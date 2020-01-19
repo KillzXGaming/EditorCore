@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MarioKart.MK7
 {
-	class KCLColors
+    public class KCLColors
 	{
 		public enum CollisionType_MK8D : ushort
 		{
