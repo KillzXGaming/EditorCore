@@ -192,7 +192,7 @@ namespace ByamlExt.Byaml
                     reader.ByteOrder = _byteOrder;
                     reader.BaseStream.Position = 0;
                     if (reader.ReadUInt16() != _magicBytes) throw new Exception("Header mismatch");
-                }
+                } 
                 _version = reader.ReadUInt16();
                 uint nameArrayOffset = reader.ReadUInt32();
                 uint stringArrayOffset = reader.ReadUInt32();
