@@ -51,7 +51,7 @@ namespace KCLExt
             cameraCodeCB.SelectedItem = "NoThrough";
             floorCodeCB.SelectedItem = "Ground";
             wallCodeCB.SelectedItem = "Wall";
-            materialCodeCB.SelectedIndex = 0;
+            materialCodeCB.SelectedItem = "NoCode";
             materialPrefixCodeCB.SelectedIndex = 0;
         }
 
@@ -61,8 +61,8 @@ namespace KCLExt
 
             cameraCodeCB.SelectedItem = "NoThrough";
             floorCodeCB.SelectedItem = "Ground";
-            wallCodeCB.SelectedIndex = 0;
-            materialCodeCB.SelectedIndex = 0;
+            wallCodeCB.SelectedItem = "Wall";
+            materialCodeCB.SelectedItem = "NoCode";
             materialPrefixCodeCB.SelectedIndex = 0;
 
             if (UseObjectMaterials)
@@ -172,10 +172,10 @@ namespace KCLExt
                 IDictionary<string, dynamic> colCodes = new Dictionary<string, dynamic>();
                 colCodes.Add("CameraCode", CameraCodes[entry.CameraCode]);
                 colCodes.Add("FloorCodes", FloorCodes[entry.FloorCode]);
+                if (entry.MaterialPrefixCode != "NONE")
+                    colCodes.Add("MaterialCodePrefix", MaterialPrefixCodes[entry.MaterialPrefixCode]);
                 colCodes.Add("MaterialCodes", MaterialCodes[entry.MaterialCode]);
                 colCodes.Add("WallCodes", WallCodes[entry.WallCode]);
-
-                // colCodes.Add("MaterialPrefixCode", MaterialPrefixCodes[entry.MaterialPrefixCode]);
                 root.Add(colCodes);
             }
 
