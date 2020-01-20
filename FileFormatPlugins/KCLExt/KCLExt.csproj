@@ -56,6 +56,12 @@
   <ItemGroup>
     <Compile Include="BinaryDataReaderExtensions.cs" />
     <Compile Include="BinaryDataWriterExtensions.cs" />
+    <Compile Include="CollisionMaterials\MaterialGridView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CollisionMaterials\MaterialGridView.Designer.cs">
+      <DependentUpon>MaterialGridView.cs</DependentUpon>
+    </Compile>
     <Compile Include="KCLExt.cs" />
     <Compile Include="KCL\STProgressBar.cs">
       <SubType>Form</SubType>
@@ -63,16 +69,16 @@
     <Compile Include="KCL\TriangleBoxIntersect.cs" />
     <Compile Include="KCL\Vector2.cs" />
     <Compile Include="KCL\Vector3.cs" />
-    <Compile Include="MaterialPresetPickerPanel.cs">
+    <Compile Include="CollisionMaterials\MaterialPresetPickerPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MaterialPresetPickerPanel.Designer.cs">
+    <Compile Include="CollisionMaterials\MaterialPresetPickerPanel.Designer.cs">
       <DependentUpon>MaterialPresetPickerPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="MaterialSetForm.cs">
+    <Compile Include="CollisionMaterials\MaterialSetForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MaterialSetForm.Designer.cs">
+    <Compile Include="CollisionMaterials\MaterialSetForm.Designer.cs">
       <DependentUpon>MaterialSetForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MathUtil.cs" />
@@ -81,6 +87,12 @@
     <Compile Include="KCL\KCLHeader.cs" />
     <Compile Include="KCL\KCLOctree.cs" />
     <Compile Include="KCL\Triangle.cs" />
+    <Compile Include="CollisionMaterials\OdysseyCollisionPicker.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CollisionMaterials\OdysseyCollisionPicker.Designer.cs">
+      <DependentUpon>OdysseyCollisionPicker.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -90,17 +102,27 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="MaterialPresetPickerPanel.resx">
+    <EmbeddedResource Include="CollisionMaterials\MaterialGridView.resx">
+      <DependentUpon>MaterialGridView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CollisionMaterials\MaterialPresetPickerPanel.resx">
       <DependentUpon>MaterialPresetPickerPanel.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MaterialSetForm.resx">
+    <EmbeddedResource Include="CollisionMaterials\MaterialSetForm.resx">
       <DependentUpon>MaterialSetForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CollisionMaterials\OdysseyCollisionPicker.resx">
+      <DependentUpon>OdysseyCollisionPicker.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\EditorCoreCommon\EditorCoreCommon.csproj">
       <Project>{ee9882d0-f7a7-45e1-971a-1527b7e399f5}</Project>
       <Name>EditorCoreCommon</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ByamlLib\ByamlExt.csproj">
+      <Project>{6d1801b8-7b24-49d6-83a1-e21ccc280d8e}</Project>
+      <Name>ByamlExt</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

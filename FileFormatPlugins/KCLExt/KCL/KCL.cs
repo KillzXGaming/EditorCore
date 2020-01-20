@@ -13,6 +13,8 @@ namespace MarioKart.MK7
 {
     public class KCL
     {
+        public ByamlExt.Byaml.BymlFileData AttributeByml = null;
+
         public KCLModel.KCLModelHeader GlobalHeader;
         public List<KCLModel> Models = new List<KCLModel>();
 
@@ -257,6 +259,7 @@ namespace MarioKart.MK7
             var form = MaterialSetForm.ShowForm(o.MaterialNames, o.MeshNames.ToArray());
             var MapMeshes = !form.UseObjectMaterials;
             var MatDictionary = form.Result;
+            res.AttributeByml = form.AttributeByml;
 
             STProgressBar progressBar = new STProgressBar();
             progressBar.Value = 0;
