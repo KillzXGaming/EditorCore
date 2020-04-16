@@ -47,6 +47,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="SarcEditor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -55,16 +60,24 @@
     </Compile>
     <Compile Include="SarcExt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sarc\SAHT.cs" />
     <Compile Include="Sarc\SARC.cs" />
     <Compile Include="Sarc\Yaz0Compression.cs" />
     <Compile Include="Sarc\Yaz0Exception.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="SarcEditor.resx">
       <DependentUpon>SarcEditor.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="HashTables\Mario Kart 7.saht" />
+    <None Include="HashTables\Mario Kart 8 Deluxe.saht" />
+    <None Include="HashTables\Mario Kart 8.saht" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

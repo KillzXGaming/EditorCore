@@ -8,15 +8,12 @@ namespace ByamlExt.Byaml
 	/// </summary>
 	internal enum ByamlNodeType : byte
 	{
-        /// <summary>
-        /// Represents an empty type. Used to detect path nodes
-        /// </summary>
         None,
 
-		/// <summary>
-		/// The node represents a <see cref="string"/> (internally referenced by index).
-		/// </summary>
-		StringIndex = 0xA0,
+        /// <summary>
+        /// The node represents a <see cref="string"/> (internally referenced by index).
+        /// </summary>
+        StringIndex = 0xA0,
 
 		/// <summary>
 		/// The node represents a list of <see cref="ByamlPathPoint"/> instances (internally referenced by index).
@@ -89,6 +86,11 @@ namespace ByamlExt.Byaml
 	/// </summary>
 	internal static class ByamlNodeTypeExtensions
 	{
+		internal static bool IsEnumerable(this ByamlNodeType nodeType) 
+		{
+			return nodeType >= ByamlNodeType.Array && nodeType <= ByamlNodeType.PathArray;
+		}
+
 		/// <summary>
 		/// Gets the corresponding, instantiatable <see cref="Type"/> for the given <paramref name="nodeType"/>.
 		/// </summary>

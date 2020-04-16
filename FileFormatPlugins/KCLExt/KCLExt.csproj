@@ -30,6 +30,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="Syroot.BinaryData, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Syroot.IO.BinaryData.2.0.2\lib\net45\Syroot.BinaryData.dll</HintPath>
@@ -56,12 +60,19 @@
   <ItemGroup>
     <Compile Include="BinaryDataReaderExtensions.cs" />
     <Compile Include="BinaryDataWriterExtensions.cs" />
+    <Compile Include="CollisionMaterials\MaterialCollisionPicker.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CollisionMaterials\MaterialCollisionPicker.Designer.cs">
+      <DependentUpon>MaterialCollisionPicker.cs</DependentUpon>
+    </Compile>
     <Compile Include="CollisionMaterials\MaterialGridView.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="CollisionMaterials\MaterialGridView.Designer.cs">
       <DependentUpon>MaterialGridView.cs</DependentUpon>
     </Compile>
+    <Compile Include="CollisionPresetData.cs" />
     <Compile Include="KCLExt.cs" />
     <Compile Include="KCL\STProgressBar.cs">
       <SubType>Form</SubType>
@@ -69,12 +80,6 @@
     <Compile Include="KCL\TriangleBoxIntersect.cs" />
     <Compile Include="KCL\Vector2.cs" />
     <Compile Include="KCL\Vector3.cs" />
-    <Compile Include="CollisionMaterials\MaterialPresetPickerPanel.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="CollisionMaterials\MaterialPresetPickerPanel.Designer.cs">
-      <DependentUpon>MaterialPresetPickerPanel.cs</DependentUpon>
-    </Compile>
     <Compile Include="CollisionMaterials\MaterialSetForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -102,11 +107,11 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="CollisionMaterials\MaterialCollisionPicker.resx">
+      <DependentUpon>MaterialCollisionPicker.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="CollisionMaterials\MaterialGridView.resx">
       <DependentUpon>MaterialGridView.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="CollisionMaterials\MaterialPresetPickerPanel.resx">
-      <DependentUpon>MaterialPresetPickerPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="CollisionMaterials\MaterialSetForm.resx">
       <DependentUpon>MaterialSetForm.cs</DependentUpon>

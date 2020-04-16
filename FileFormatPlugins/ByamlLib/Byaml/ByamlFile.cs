@@ -11,12 +11,13 @@ using EditorCore;
 
 namespace ByamlExt.Byaml
 {
-    public class BymlFileData
-    {
+	public class BymlFileData
+	{
         public ByteOrder byteOrder;
-        public ushort Version;
-        public bool SupportPaths;
-        public dynamic RootNode;
+		public ushort Version;
+		public bool SupportPaths;
+		public dynamic RootNode;
+        public static Encoding Encoding = Encoding.UTF8;
     }
 
     /// <summary>
@@ -29,32 +30,32 @@ namespace ByamlExt.Byaml
         // ---- CONSTANTS ----------------------------------------------------------------------------------------------
 
         private const ushort _magicBytes = 0x4259; // "BY"
-                                                   // ---- MEMBERS ------------------------------------------------------------------------------------------------
-        private ushort _version;
-        private bool _supportPaths;
+		// ---- MEMBERS ------------------------------------------------------------------------------------------------
+		private ushort _version;
+		private bool _supportPaths;
         private ByteOrder _byteOrder;
 
         private List<string> _nameArray;
         private List<string> _stringArray;
         private List<List<ByamlPathPoint>> _pathArray;
-        private bool _fastLoad = false;
+		private bool _fastLoad = false;
 
         // ---- CONSTRUCTORS & DESTRUCTOR ------------------------------------------------------------------------------
 
-        private ByamlFile(bool supportPaths, ByteOrder byteOrder, ushort _ver, bool fastLoad = false)
+        private ByamlFile(bool supportPaths, ByteOrder byteOrder, ushort _ver , bool fastLoad = false)
         {
-            _version = _ver;
+			_version = _ver;
             _supportPaths = supportPaths;
             _byteOrder = byteOrder;
-            _fastLoad = fastLoad;
-            if (fastLoad)
-            {
-                AlreadyReadNodes = new Dictionary<uint, dynamic>();
-            }
-        }
+			_fastLoad = fastLoad;
+			if (fastLoad)
+			{
+				AlreadyReadNodes = new Dictionary<uint, dynamic>();
+			}
+		}
 
         // ---- METHODS (PUBLIC) ---------------------------------------------------------------------------------------
-
+        
         /// <summary>
         /// Deserializes and returns the dynamic value of the BYAML node read from the given file.
         /// </summary>
@@ -69,7 +70,7 @@ namespace ByamlExt.Byaml
                 return LoadN(stream, supportPaths, byteOrder);
             }
         }
-
+        
         /// <summary>
         /// Deserializes and returns the dynamic value of the BYAML node read from the specified stream.
         /// </summary>
@@ -77,32 +78,32 @@ namespace ByamlExt.Byaml
         /// <param name="supportPaths">Whether to expect a path array offset. This must be enabled for Mario Kart 8
         /// files.</param>
         /// <param name="byteOrder">The <see cref="ByteOrder"/> to read data in.</param>
-        public static BymlFileData LoadN(Stream stream, bool supportPaths = false, ByteOrder byteOrder = ByteOrder.LittleEndian)
+        public static BymlFileData LoadN(Stream stream, bool supportPaths = false, ByteOrder byteOrder = ByteOrder.LittleEndian, bool leaveOpen = false)
         {
-            ByamlFile byamlFile = new ByamlFile(supportPaths, byteOrder, 3);
-            var r = byamlFile.Read(stream);
-            return new BymlFileData() { byteOrder = byamlFile._byteOrder, RootNode = r, Version = byamlFile._version, SupportPaths = supportPaths };
-        }
+            ByamlFile byamlFile = new ByamlFile(supportPaths, byteOrder,3);
+			var r = byamlFile.Read(stream, BymlFileData.Encoding, leaveOpen);
+			return new BymlFileData() { byteOrder = byamlFile._byteOrder, RootNode = r, Version = byamlFile._version, SupportPaths = byamlFile._supportPaths };
+		}
 
-        /// <summary>
-        /// Deserializes and returns the dynamic value of the BYAML node read from the specified stream keeping the references, do not use this if you intend to edit the byml.
-        /// </summary>
-        /// <param name="stream">The <see cref="Stream"/> to read the data from.</param>
-        /// <param name="supportPaths">Whether to expect a path array offset. This must be enabled for Mario Kart 8
-        /// files.</param>
-        /// <param name="byteOrder">The <see cref="ByteOrder"/> to read data in.</param>
-        public static BymlFileData FastLoadN(Stream stream, bool supportPaths = false, ByteOrder byteOrder = ByteOrder.LittleEndian)
-        {
-            ByamlFile byamlFile = new ByamlFile(supportPaths, byteOrder, 3, true);
-            var r = byamlFile.Read(stream);
-            return new BymlFileData() { byteOrder = byamlFile._byteOrder, RootNode = r, Version = byamlFile._version, SupportPaths = supportPaths };
-        }
-
-        /// <summary>
-        /// Serializes the given dynamic value which requires to be an array or dictionary of BYAML compatible values
-        /// and stores it in the given file.
-        /// </summary>
-        public static void SaveN(string fileName, BymlFileData file)
+		/// <summary>
+		/// Deserializes and returns the dynamic value of the BYAML node read from the specified stream keeping the references, do not use this if you intend to edit the byml.
+		/// </summary>
+		/// <param name="stream">The <see cref="Stream"/> to read the data from.</param>
+		/// <param name="supportPaths">Whether to expect a path array offset. This must be enabled for Mario Kart 8
+		/// files.</param>
+		/// <param name="byteOrder">The <see cref="ByteOrder"/> to read data in.</param>
+		public static BymlFileData FastLoadN(Stream stream, bool supportPaths = false, ByteOrder byteOrder = ByteOrder.LittleEndian, bool leaveOpen  = false)
+		{
+			ByamlFile byamlFile = new ByamlFile(supportPaths, byteOrder, 3, true);
+			var r = byamlFile.Read(stream, BymlFileData.Encoding, leaveOpen);
+			return new BymlFileData() { byteOrder = byamlFile._byteOrder, RootNode = r, Version = byamlFile._version, SupportPaths = byamlFile._supportPaths };
+		}
+		
+		/// <summary>
+		/// Serializes the given dynamic value which requires to be an array or dictionary of BYAML compatible values
+		/// and stores it in the given file.
+		/// </summary>
+		public static void SaveN(string fileName, BymlFileData file)
         {
             using (FileStream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None))
             {
@@ -125,8 +126,8 @@ namespace ByamlExt.Byaml
         /// </summary>
         public static void SaveN(Stream stream, BymlFileData file)
         {
-            ByamlFile byamlFile = new ByamlFile(file.SupportPaths, file.byteOrder, file.Version);
-            byamlFile.Write(stream, file.RootNode);
+			ByamlFile byamlFile = new ByamlFile(file.SupportPaths, file.byteOrder, file.Version);
+            byamlFile.Write(stream, file.RootNode, BymlFileData.Encoding);
         }
 
         // ---- Helper methods ----
@@ -178,10 +179,10 @@ namespace ByamlExt.Byaml
         // ---- METHODS (PRIVATE) --------------------------------------------------------------------------------------
 
         // ---- Loading ----
-        private dynamic Read(Stream stream)
+        private dynamic Read(Stream stream, Encoding encoding, bool leaveOpen)
         {
             // Open a reader on the given stream.
-            using (BinaryDataReader reader = new BinaryDataReader(stream, Encoding.UTF8, true))
+            using (BinaryDataReader reader = new BinaryDataReader(stream, encoding, true))
             {
                 reader.ByteOrder = _byteOrder;
 
@@ -192,13 +193,19 @@ namespace ByamlExt.Byaml
                     reader.ByteOrder = _byteOrder;
                     reader.BaseStream.Position = 0;
                     if (reader.ReadUInt16() != _magicBytes) throw new Exception("Header mismatch");
-                } 
-                _version = reader.ReadUInt16();
-                uint nameArrayOffset = reader.ReadUInt32();
-                uint stringArrayOffset = reader.ReadUInt32();
+                }
+				_version = reader.ReadUInt16();
+	
+                // Read the name array, holding strings referenced by index for the names of other nodes.
+                _nameArray = ReadEnumerableNode(reader,reader.ReadUInt32(), true);
+                _stringArray = ReadEnumerableNode(reader, reader.ReadUInt32(), true);
+
+                if (reader.BaseStream.Length <= 16)
+                    return new List<dynamic>();
 
                 using (reader.TemporarySeek())
                 {
+                    //Thanks to Syroot https://gitlab.com/Syroot/NintenTools.Byaml/blob/master/src/Syroot.NintenTools.Byaml/DynamicLoader.cs
                     // Paths are supported if the third offset is a path array (or null) and the fourth a root.
                     ByamlNodeType thirdNodeType = PeekNodeType(reader);
                     reader.Seek(sizeof(uint));
@@ -209,44 +216,14 @@ namespace ByamlExt.Byaml
 
                 }
 
-
-                uint pathArrayOffset = 0;
                 if (_supportPaths)
-                {
-                    pathArrayOffset = reader.ReadUInt32();
-                }
+                    _pathArray = ReadEnumerableNode(reader, reader.ReadUInt32(), true);
+
                 uint rootNodeOffset = reader.ReadUInt32();
-
-                // Read the name array, holding strings referenced by index for the names of other nodes.
-                if (nameArrayOffset != 0)
-                {
-                    reader.Seek(nameArrayOffset, SeekOrigin.Begin);
-                    _nameArray = ReadNode(reader);
-                }
-
-                // Read the optional string array, holding strings referenced by index in string nodes.
-                if (stringArrayOffset != 0)
-                {
-                    reader.Seek(stringArrayOffset, SeekOrigin.Begin);
-                    _stringArray = ReadNode(reader);
-                }
-
-                // Read the optional path array, holding paths referenced by index in path nodes.
-                if (_supportPaths && pathArrayOffset != 0)
-                {
-                    // The third offset is the root node, so just read that and we're done.
-                    reader.Seek(pathArrayOffset, SeekOrigin.Begin);
-                    _pathArray = ReadNode(reader);
-                }
-
                 if (rootNodeOffset == 0) //empty byml
-                {
                     return new List<dynamic>();
-                }
-
-                // Read the root node.
-                reader.Seek(rootNodeOffset, SeekOrigin.Begin);
-                return ReadNode(reader, 0);
+                else
+                    return ReadEnumerableNode(reader, rootNodeOffset, true);
             }
         }
 
@@ -270,125 +247,115 @@ namespace ByamlExt.Byaml
         }
 
         //Node references are disabled unless fastLoad is active since it leads to multiple objects sharing the same values for different fields (eg. a position node can be shared between multiple objects)
-        private Dictionary<uint, dynamic> AlreadyReadNodes = null; //Offset in the file, reference to node
+        private Dictionary<uint, dynamic> AlreadyReadNodes = new Dictionary<uint, dynamic>(); //Offset in the file, reference to node
 
-        private dynamic ReadNode(BinaryDataReader reader, ByamlNodeType nodeType = 0)
+		private dynamic ReadNode(BinaryDataReader reader, ByamlNodeType nodeType)
         {
-            // Read the node type if it has not been provided yet.
-            bool nodeTypeGiven = nodeType != 0;
-            if (!nodeTypeGiven)
+            // Read the following UInt32 which is representing the value directly.
+            switch (nodeType)
             {
-                nodeType = (ByamlNodeType)reader.ReadByte();
-            }
-            if (nodeType >= ByamlNodeType.Array && nodeType <= ByamlNodeType.PathArray)
-            {
-                // Get the length of arrays.
-                long? oldPos = null;
-                uint offset = 0;
-                if (nodeTypeGiven)
-                {
-                    // If the node type was given, the array value is read from an offset.
-                    offset = reader.ReadUInt32();
-
-                    if (_fastLoad && AlreadyReadNodes.ContainsKey(offset))
+                case ByamlNodeType.Array:
+                case ByamlNodeType.Dictionary:
+                case ByamlNodeType.StringArray:
+                case ByamlNodeType.PathArray:
+                    return reader.ReadUInt32(); // offset
+                case ByamlNodeType.StringIndex:
+                    return _stringArray[reader.ReadInt32()];
+                case ByamlNodeType.PathIndex:
                     {
-                        return AlreadyReadNodes[offset];
+                        int index = reader.ReadInt32();
+                        if (_pathArray != null && _pathArray.Count > index)
+                            return _pathArray[index];
+                        else
+                            return new ByamlPathIndex() { Index = index };
                     }
-
-                    oldPos = reader.Position;
-                    reader.Seek(offset, SeekOrigin.Begin);
-                }
-                else
-                {
-                    reader.Seek(-1);
-                }
-                dynamic value = null;
-                int length = (int)Get3LsbBytes(reader.ReadUInt32());
-                switch (nodeType)
-                {
-                    case ByamlNodeType.Array:
-                        value = ReadArrayNode(reader, length, offset);
-                        break;
-                    case ByamlNodeType.Dictionary:
-                        value = ReadDictionaryNode(reader, length, offset);
-                        break;
-                    case ByamlNodeType.StringArray:
-                        value = ReadStringArrayNode(reader, length);
-                        break;
-                    case ByamlNodeType.PathArray:
-                        value = ReadPathArrayNode(reader, length);
-                        break;
-                    default:
-                        throw new ByamlException($"Unknown node type '{nodeType}'.");
-                }
-                // Seek back to the previous position if this was a value positioned at an offset.
-                if (oldPos.HasValue)
-                {
-                    reader.Seek(oldPos.Value, SeekOrigin.Begin);
-                }
-                return value;
-            }
-            else
-            {
-                // Read the following UInt32 which is representing the value directly.
-                switch (nodeType)
-                {
-                    case ByamlNodeType.StringIndex:
-                        return _stringArray[reader.ReadInt32()];
-                    case ByamlNodeType.PathIndex:
-                        return _pathArray[reader.ReadInt32()];
-                    case ByamlNodeType.Boolean:
-                        return reader.ReadInt32() != 0;
-                    case ByamlNodeType.Integer:
-                        return reader.ReadInt32();
-                    case ByamlNodeType.Float:
-                        return reader.ReadSingle();
-                    case ByamlNodeType.Uinteger:
-                        return reader.ReadUInt32();
-                    case ByamlNodeType.Long:
-                    case ByamlNodeType.ULong:
-                    case ByamlNodeType.Double:
-                        var pos = reader.Position;
-                        reader.Position = reader.ReadUInt32();
-                        dynamic value = readLongValFromOffset(nodeType);
-                        reader.Position = pos + 4;
-                        return value;
-                    case ByamlNodeType.Null:
-                        reader.Seek(0x4);
-                        return null;
-                    default:
-                        throw new ByamlException($"Unknown node type '{nodeType}'.");
-                }
+                case ByamlNodeType.Boolean:
+                    return reader.ReadInt32() != 0;
+                case ByamlNodeType.Integer:
+                    return reader.ReadInt32();
+                case ByamlNodeType.Float:
+                    return reader.ReadSingle();
+                case ByamlNodeType.Uinteger:
+                    return reader.ReadUInt32();
+                case ByamlNodeType.Long:
+                case ByamlNodeType.ULong:
+                case ByamlNodeType.Double:
+                    var pos = reader.Position;
+                    reader.Position = reader.ReadUInt32();
+                    dynamic value = readLongValFromOffset(nodeType);
+                    reader.Position = pos + 4;
+                    return value;
+                case ByamlNodeType.Null:
+                    reader.Seek(0x4);
+                    return null;
+                default:
+                    throw new ByamlException($"Unknown node type '{nodeType.ToString("X")}'.");
             }
 
             dynamic readLongValFromOffset(ByamlNodeType type)
+			{
+				switch (type)
+				{
+					case ByamlNodeType.Long:
+						return reader.ReadInt64();
+					case ByamlNodeType.ULong:
+						return reader.ReadUInt64();
+					case ByamlNodeType.Double:
+						return reader.ReadDouble();
+				}
+				throw new ByamlException($"Unknown node type '{nodeType}'.");
+			}
+        }
+
+        private dynamic ReadEnumerableNode(BinaryDataReader reader, uint offset, bool isRoot = false)
+        {
+            if (AlreadyReadNodes.ContainsKey(offset))
+                return AlreadyReadNodes[offset];
+
+            object node = null;
+            if (offset > 0 && !AlreadyReadNodes.TryGetValue(offset, out node))
             {
-                switch (type)
+                using (reader.TemporarySeek(offset, SeekOrigin.Begin))
                 {
-                    case ByamlNodeType.Long:
-                        return reader.ReadInt64();
-                    case ByamlNodeType.ULong:
-                        return reader.ReadUInt64();
-                    case ByamlNodeType.Double:
-                        return reader.ReadDouble();
+                    ByamlNodeType type = (ByamlNodeType)reader.ReadByte();
+                    reader.Seek(-1);
+                    int length = (int)Get3LsbBytes(reader.ReadUInt32());
+                    switch (type)
+                    {
+                        case ByamlNodeType.Array:
+                            node = ReadArrayNode(reader, length, offset);
+                            break;
+                        case ByamlNodeType.Dictionary:
+                            node = ReadDictionaryNode(reader, length, offset);
+                            break;
+                        case ByamlNodeType.StringArray:
+                            node = ReadStringArrayNode(reader, length);
+                            break;
+                        case ByamlNodeType.PathArray:
+                            node = ReadPathArrayNode(reader, length);
+                            break;
+                        default: throw new ByamlException($"Invalid enumerable node type {type}.");
+                    }
                 }
-                throw new ByamlException($"Unknown node type '{nodeType}'.");
             }
+            return node;
         }
 
         private List<dynamic> ReadArrayNode(BinaryDataReader reader, int length, uint offset = 0)
         {
             List<dynamic> array = new List<dynamic>(length);
+            if (offset != 0) AlreadyReadNodes.Add(offset, array);
 
-            if (_fastLoad && offset != 0) AlreadyReadNodes.Add(offset, array);
-
-            // Read the element types of the array.
-            byte[] nodeTypes = reader.ReadBytes(length);
-            // Read the elements, which begin after a padding to the next 4 bytes.
+            IEnumerable<ByamlNodeType> types = reader.ReadBytes(length).Select(x => (ByamlNodeType)x);
             reader.Align(4);
-            for (int i = 0; i < length; i++)
+
+            foreach (ByamlNodeType type in types)
             {
-                array.Add(ReadNode(reader, (ByamlNodeType)nodeTypes[i]));
+                dynamic value = ReadNode(reader, type);
+                if (type.IsEnumerable())
+                    array.Add(ReadEnumerableNode(reader, value));
+                else
+                    array.Add(value);
             }
 
             return array;
@@ -396,60 +363,72 @@ namespace ByamlExt.Byaml
 
         private Dictionary<string, dynamic> ReadDictionaryNode(BinaryDataReader reader, int length, uint offset = 0)
         {
-            Dictionary<string, dynamic> dictionary = new Dictionary<string, dynamic>();
-
-            if (_fastLoad && offset != 0) AlreadyReadNodes.Add(offset, dictionary);
+            Dictionary<string, dynamic> dictionary = new Dictionary<string, dynamic>(length);
+            SortedList<uint, string> enumerables = new SortedList<uint, string>(new DuplicateKeyComparer<uint>());
+            if (offset != 0)  AlreadyReadNodes.Add(offset, dictionary);
 
             // Read the elements of the dictionary.
             for (int i = 0; i < length; i++)
             {
                 uint indexAndType = reader.ReadUInt32();
                 int nodeNameIndex = (int)Get3MsbBytes(indexAndType);
-                ByamlNodeType nodeType = (ByamlNodeType)Get1MsbByte(indexAndType);
-                string nodeName = _nameArray[nodeNameIndex];
-                dictionary.Add(nodeName, ReadNode(reader, nodeType));
+                ByamlNodeType type = (ByamlNodeType)Get1MsbByte(indexAndType);
+                string name = _nameArray[nodeNameIndex];
+
+                dynamic value = ReadNode(reader, type);
+
+                if (type.IsEnumerable())
+                    dictionary.Add(name, ReadEnumerableNode(reader, value));
+                else
+                    dictionary.Add(name, value);
+
+                    // Add primitive values directly, queue offset enumerable nodes to read them afterwards.
+                    /*      if (type.IsEnumerable())
+                          enumerables.Add(value, name);
+                      else
+                          dictionary.Add(name, value);*/
             }
+
+            // Read the offset enumerable nodes in the order of how they appear in the file.
+            foreach (KeyValuePair<uint, string> enumerable in enumerables)
+                dictionary.Add(enumerable.Value, ReadEnumerableNode(reader, enumerable.Key));
 
             return dictionary;
         }
 
         private List<string> ReadStringArrayNode(BinaryDataReader reader, int length)
         {
+            long nodeOffset = reader.Position - sizeof(uint); // Element offsets are relative to the start of node.
             List<string> stringArray = new List<string>(length);
 
             // Read the element offsets.
-            long nodeOffset = reader.Position - 4; // String offsets are relative to the start of node.
             uint[] offsets = reader.ReadUInt32s(length);
 
-            // Read the strings by seeking to their element offset and then back.
-            long oldPosition = reader.Position;
-            for (int i = 0; i < length; i++)
+            // Read the elements.
+            foreach (uint offset in offsets)
             {
-                reader.Seek(nodeOffset + offsets[i], SeekOrigin.Begin);
+                reader.Position = nodeOffset + offset;
                 stringArray.Add(reader.ReadString(BinaryStringFormat.ZeroTerminated));
             }
-            reader.Seek(oldPosition, SeekOrigin.Begin);
 
             return stringArray;
         }
 
         private List<List<ByamlPathPoint>> ReadPathArrayNode(BinaryDataReader reader, int length)
         {
+            long nodeOffset = reader.Position - sizeof(uint); // Element offsets are relative to the start of node.
             List<List<ByamlPathPoint>> pathArray = new List<List<ByamlPathPoint>>(length);
 
             // Read the element offsets.
-            long nodeOffset = reader.Position - 4; // Path offsets are relative to the start of node.
             uint[] offsets = reader.ReadUInt32s(length + 1);
 
-            // Read the paths by seeking to their element offset and then back.
-            long oldPosition = reader.Position;
+            // Read the elements.
             for (int i = 0; i < length; i++)
             {
-                reader.Seek(nodeOffset + offsets[i], SeekOrigin.Begin);
-                int pointCount = (int)((offsets[i + 1] - offsets[i]) / 0x1C);
+                reader.Position = nodeOffset + offsets[i];
+                int pointCount = (int)((offsets[i + 1] - offsets[i]) / ByamlPathPoint.SizeInBytes);
                 pathArray.Add(ReadPath(reader, pointCount));
             }
-            reader.Seek(oldPosition, SeekOrigin.Begin);
 
             return pathArray;
         }
@@ -475,7 +454,7 @@ namespace ByamlExt.Byaml
 
         // ---- Saving ----
 
-        private void Write(Stream stream, object root)
+        private void Write(Stream stream, object root, Encoding encoding)
         {
             // Check if the root is of the correct type.
             if (root == null)
@@ -491,14 +470,14 @@ namespace ByamlExt.Byaml
             _nameArray = new List<string>();
             _stringArray = new List<string>();
             _pathArray = new List<List<ByamlPathPoint>>();
-            List<dynamic> tmp = new List<dynamic>();
-            CollectNodeArrayContents(root, ref tmp);
-            tmp.Clear();
+            CollectNodeArrayContents(root);
+            readNodes.Clear();
             _nameArray.Sort(StringComparer.Ordinal);
             _stringArray.Sort(StringComparer.Ordinal);
+            alreadyWrittenNodes = new Dictionary<dynamic, uint>();
 
             // Open a writer on the given stream.
-            using (BinaryDataWriter writer = new BinaryDataWriter(stream, Encoding.UTF8, true))
+            using (BinaryDataWriter writer = new BinaryDataWriter(stream, encoding, true))
             {
                 writer.ByteOrder = _byteOrder;
 
@@ -511,87 +490,60 @@ namespace ByamlExt.Byaml
                 Offset rootOffset = writer.ReserveOffset();
 
                 // Write the main nodes.
-                WriteValueContents(writer, nameArrayOffset, ByamlNodeType.StringArray, _nameArray);
+                WriteEnumerableNode(writer, nameArrayOffset.Position, ByamlNodeType.StringArray, _nameArray);
                 if (_stringArray.Count == 0)
-                {
                     writer.Write(0);
-                }
                 else
-                {
-                    WriteValueContents(writer, stringArrayOffset, ByamlNodeType.StringArray, _stringArray);
-                }
+                    WriteEnumerableNode(writer, stringArrayOffset.Position, ByamlNodeType.StringArray, _stringArray);
 
                 // Include a path array offset if requested.
-                if (_supportPaths)
-                {
+                if (_supportPaths) {
                     if (_pathArray.Count == 0)
-                    {
                         writer.Write(0);
-                    }
                     else
-                    {
-                        WriteValueContents(writer, pathArrayOffset, ByamlNodeType.PathArray, _pathArray);
-                    }
+                        WriteEnumerableNode(writer, pathArrayOffset.Position, ByamlNodeType.PathArray, _pathArray);
                 }
 
                 // Write the root node.
-                WriteValueContents(writer, rootOffset, GetNodeType(root), root);
+                WriteEnumerableNode(writer, rootOffset.Position, GetNodeType(root), (IEnumerable)root);
             }
         }
 
-        private void CollectNodeArrayContents(dynamic node, ref List<dynamic> alreadyCollected)
+        List<dynamic> readNodes = new List<dynamic>();
+        private void CollectNodeArrayContents(dynamic node)
         {
             if (node == null) return;
-            foreach (var o in alreadyCollected.Where(x => !IEnumerableCompare.TypeNotEqual(x.GetType(), node.GetType())))
-            {
-                if (node is string)
-                {
-                    if (o == node)
-                        return;
-                }
-                else if (node is IEnumerable)
-                {
-                    if (IEnumerableCompare.IsEqual(node, o))
-                        return;
-                }
-                else if (node == o)
-                    return;
-            }
 
-            alreadyCollected.Add(node);
-            if (node is string)
+            if (readNodes.Contains(node))
+                return;
+
+            readNodes.Add(node);
+            switch (node)
             {
-                if (!_stringArray.Contains((string)node))
-                {
-                    _stringArray.Add((string)node);
-                }
-            }
-            else if (node is List<ByamlPathPoint>)
-            {
-                _pathArray.Add((List<ByamlPathPoint>)node);
-            }
-            else if (node is IDictionary<string, dynamic>)
-            {
-                foreach (KeyValuePair<string, dynamic> entry in node)
-                {
-                    if (!_nameArray.Contains(entry.Key))
+                case string stringNode:
+                    if (!_stringArray.Contains(stringNode))
+                        _stringArray.Add(stringNode);
+                    break;
+                case List<ByamlPathPoint> pathNode:
+                    _pathArray.Add(pathNode);
+                    break;
+                case IDictionary<string, object> dictionaryNode:
+                    foreach (KeyValuePair<string, object> entry in dictionaryNode)
                     {
-                        _nameArray.Add(entry.Key);
+                        if (!_nameArray.Contains(entry.Key))
+                            _nameArray.Add(entry.Key);
+                        CollectNodeArrayContents(entry.Value);
                     }
-                    CollectNodeArrayContents(entry.Value, ref alreadyCollected);
-                }
-            }
-            else if (node is IList<dynamic>)
-            {
-                foreach (dynamic childNode in node)
-                {
-                    CollectNodeArrayContents(childNode, ref alreadyCollected);
-                }
+                    break;
+                case IEnumerable arrayNode:
+                    foreach (object childNode in arrayNode)
+                        CollectNodeArrayContents(childNode);
+                    break;
             }
         }
-
+		
         Dictionary<dynamic, uint> alreadyWrittenNodes = new Dictionary<dynamic, uint>();
-        private Offset WriteValue(BinaryDataWriter writer, dynamic value)
+        private uint WriteValue(BinaryDataWriter writer, dynamic value)
         {
             // Only reserve and return an offset for the complex value contents, write simple values directly.
             ByamlNodeType type = GetNodeType(value);
@@ -599,89 +551,69 @@ namespace ByamlExt.Byaml
             {
                 case ByamlNodeType.StringIndex:
                     WriteStringIndexNode(writer, value);
-                    return null;
+                    return 0;
                 case ByamlNodeType.PathIndex:
-                    WritePathIndexNode(writer, value);
-                    return null;
+                    if (value is ByamlPathIndex)
+                        writer.Write(((ByamlPathIndex)value).Index);
+                    else
+                        WritePathIndexNode(writer, value);
+                    return 0;
                 case ByamlNodeType.Dictionary:
                 case ByamlNodeType.Array:
-                    foreach (var d in alreadyWrittenNodes.Keys.Where(x => x is IEnumerable && x.Count == value.Count))
-                    {
-                        if (IEnumerableCompare.IsEqual(d, value))
-                        {
-                            writer.Write(alreadyWrittenNodes[d]);
-                            return null;
-                        }
-                    }
-                    return writer.ReserveOffset();
+                    return writer.ReserveOffset().Position;
                 case ByamlNodeType.Boolean:
                     writer.Write(value ? 1 : 0);
-                    return null;
+                    return 0;
                 case ByamlNodeType.Integer:
-                case ByamlNodeType.Float:
-                case ByamlNodeType.Uinteger:
-                    writer.Write(value);
-                    return null;
+				case ByamlNodeType.Float:
+				case ByamlNodeType.Uinteger:
                 case ByamlNodeType.Double:
                 case ByamlNodeType.ULong:
                 case ByamlNodeType.Long:
-                    return writer.ReserveOffset();
+                    writer.Write(value);
+                    return 0;
                 case ByamlNodeType.Null:
                     writer.Write(0x0);
-                    return null;
+                    return 0;
                 default:
                     throw new ByamlException($"{type} not supported as value node.");
             }
         }
 
-        private void WriteValueContents(BinaryDataWriter writer, Offset offset, ByamlNodeType type, dynamic value)
+        private void WriteEnumerableNode(BinaryDataWriter writer, uint offset, ByamlNodeType type, IEnumerable node)
         {
-            if (alreadyWrittenNodes.ContainsKey(value))
+            if (alreadyWrittenNodes.TryGetValue(node, out uint position))
             {
-                offset.Satisfy((int)alreadyWrittenNodes[value]);
+                writer.SatisfyOffset(offset, position);
                 return;
             }
-            else if (value is IEnumerable)
+            else
             {
-                foreach (var d in alreadyWrittenNodes.Keys.Where(x => x is IEnumerable && x.Count == value.Count))
+                // Satisfy the offset to the complex node value which must be 4-byte aligned.
+                position = (uint)writer.Position;
+                writer.SatisfyOffset(offset, position);
+                WriteTypeAndLength(writer, type, node);
+
+                alreadyWrittenNodes.Add(node, position);
+
+                // Write the value contents.
+                switch (type)
                 {
-                    if (IEnumerableCompare.IsEqual(d, value))
-                    {
-                        offset.Satisfy((int)alreadyWrittenNodes[d]);
-                        return;
-                    }
+                    case ByamlNodeType.Array:
+                        WriteArrayNode(writer, node);
+                        break;
+                    case ByamlNodeType.Dictionary:
+                        WriteDictionaryNode(writer, (IDictionary<string, object>)node);
+                        break;
+                    case ByamlNodeType.StringArray:
+                        WriteStringArrayNode(writer, (List<string>)node);
+                        break;
+                    case ByamlNodeType.PathArray:
+                        WritePathArrayNode(writer, (List<List<ByamlPathPoint>>)node); 
+                        break;
+                    default:
+                        throw new ByamlException($"{type} not supported as complex node.");
                 }
-            }
-
-            // Satisfy the offset to the complex node value which must be 4-byte aligned.
-            writer.Align(4);
-            offset.Satisfy();
-
-            // Write the value contents.
-            switch (type)
-            {
-                case ByamlNodeType.Dictionary:
-                    alreadyWrittenNodes.Add(value, (uint)writer.Position);
-                    WriteDictionaryNode(writer, value);
-                    break;
-                case ByamlNodeType.StringArray:
-                    WriteStringArrayNode(writer, value);
-                    break;
-                case ByamlNodeType.PathArray:
-                    alreadyWrittenNodes.Add(value, (uint)writer.Position);
-                    WritePathArrayNode(writer, value);
-                    break;
-                case ByamlNodeType.Array:
-                    alreadyWrittenNodes.Add(value, (uint)writer.Position);
-                    WriteArrayNode(writer, value);
-                    break;
-                case ByamlNodeType.Double:
-                case ByamlNodeType.ULong:
-                case ByamlNodeType.Long:
-                    writer.Write(value);
-                    break;
-                default:
-                    throw new ByamlException($"{type} not supported as complex node.");
             }
         }
 
@@ -709,96 +641,86 @@ namespace ByamlExt.Byaml
         {
             writer.Write(_pathArray.IndexOf(node));
         }
-
+        
         private void WriteArrayNode(BinaryDataWriter writer, IEnumerable node)
         {
-            WriteTypeAndLength(writer, ByamlNodeType.Array, node);
-
             // Write the element types.
             foreach (dynamic element in node)
-            {
                 writer.Write((byte)GetNodeType(element));
-            }
 
             // Write the elements, which begin after a padding to the next 4 bytes.
             writer.Align(4);
-            Dictionary<Offset, dynamic> offsets = new Dictionary<Offset, dynamic>();
+
+            List<IEnumerable> enumerables = new List<IEnumerable>();
+            List<uint> offsets = new List<uint>();
             foreach (dynamic element in node)
             {
-                var off = WriteValue(writer, element);
-                if (off != null)
-                    offsets.Add(off, element);
+				var off = WriteValue(writer, element);
+				if (off > 0) {
+                    offsets.Add(off);
+                    enumerables.Add((IEnumerable)element);
+                }
             }
 
             // Write the contents of complex nodes and satisfy the offsets.
-            foreach (var element in offsets)
+            for (int i = 0; i < enumerables.Count; i++)
             {
-                WriteValueContents(writer, element.Key, GetNodeType(element.Value), element.Value);
+                IEnumerable enumerable = enumerables[i];
+                WriteEnumerableNode(writer, offsets[i], GetNodeType(enumerable), enumerable);
             }
         }
 
         private void WriteDictionaryNode(BinaryDataWriter writer, IDictionary<string, dynamic> node)
         {
-            WriteTypeAndLength(writer, ByamlNodeType.Dictionary, node);
-
-            // Dictionaries need to be sorted by key.
-            var sortedDict = node.Values.Zip(node.Keys, (Value, Key) => new { Key, Value })
-                .OrderBy(x => x.Key, StringComparer.Ordinal).ToList();
+            List<EnumerableNode> enumerables = node
+               .Where(x => (GetNodeType(x.Value) >= ByamlNodeType.Array && GetNodeType(x.Value) <= ByamlNodeType.PathArray))
+               .Select(x => new EnumerableNode { Node = (IEnumerable)x.Value })
+               .ToList();
 
             // Write the key-value pairs.
-            Dictionary<Offset, dynamic> offsets = new Dictionary<Offset, dynamic>();
-            foreach (var keyValuePair in sortedDict)
+            foreach (KeyValuePair<string, object> element in node.OrderBy(x => x.Key, StringComparer.Ordinal))
             {
                 // Get the index of the key string in the file's name array and write it together with the type.
-                uint keyIndex = (uint)_nameArray.IndexOf(keyValuePair.Key);
+                uint keyIndex = (uint)_nameArray.IndexOf(element.Key);
                 if (_byteOrder == ByteOrder.BigEndian)
                 {
-                    writer.Write(keyIndex << 8 | (uint)GetNodeType(keyValuePair.Value));
+                    writer.Write(keyIndex << 8 | (uint)GetNodeType(element.Value));
                 }
                 else
                 {
-                    writer.Write(keyIndex | (uint)GetNodeType(keyValuePair.Value) << 24);
+                    writer.Write(keyIndex | (uint)GetNodeType(element.Value) << 24);
                 }
 
-                // Write the elements.
-                var off = WriteValue(writer, keyValuePair.Value);
-                if (off != null)
-                    offsets.Add(off, keyValuePair.Value);
+				// Write the elements.
+				var offset = WriteValue(writer, element.Value);
+				if (offset > 0)
+                    enumerables.Where(x => x.Node == element.Value && x.Offset == 0).First().Offset = offset;
             }
 
             // Write the value contents.
-            foreach (var element in offsets)
-            {
-                WriteValueContents(writer, element.Key, GetNodeType(element.Value), element.Value);
-            }
+            foreach (EnumerableNode enumerable in enumerables)
+                WriteEnumerableNode(writer, enumerable.Offset, GetNodeType(enumerable.Node), enumerable.Node);
         }
 
-        private void WriteStringArrayNode(BinaryDataWriter writer, IEnumerable<string> node)
+        private void WriteStringArrayNode(BinaryDataWriter writer, List<string> node)
         {
-            uint NodeStartPos = (uint)writer.BaseStream.Position;
-            WriteTypeAndLength(writer, ByamlNodeType.StringArray, node);
-
-            for (int i = 0; i <= node.Count(); i++) writer.Write(new byte[4]); //Space for offsets
-            List<uint> offsets = new List<uint>();
+            // Write the offsets to the strings, where the last one points to the end of the last string.
+            long offset = sizeof(uint) + sizeof(uint) * (node.Count + 1); // Relative to node start + all uint32 offsets.
             foreach (string str in node)
             {
-                offsets.Add((uint)writer.BaseStream.Position - NodeStartPos);
-                writer.Write(str, BinaryStringFormat.ZeroTerminated);
+                writer.Write((uint)offset);
+                offset += writer.Encoding.GetByteCount(str) + 1;
             }
-            offsets.Add((uint)writer.BaseStream.Position - NodeStartPos);
+            writer.Write((uint)offset);
+
+            foreach (string str in node)
+                writer.Write(str, BinaryStringFormat.ZeroTerminated);
             writer.Align(4);
-            uint backHere = (uint)writer.BaseStream.Position;
-            writer.BaseStream.Position = NodeStartPos + 4;
-            foreach (uint off in offsets) writer.Write(off);
-            writer.BaseStream.Position = backHere;
         }
 
 
         private void WritePathArrayNode(BinaryDataWriter writer, IEnumerable<List<ByamlPathPoint>> node)
         {
-            writer.Align(4);
-            WriteTypeAndLength(writer, ByamlNodeType.PathArray, node);
-
             // Write the offsets to the paths, where the last one points to the end of the last path.
             long offset = 4 + 4 * (node.Count() + 1); // Relative to node start + all uint32 offsets.
             foreach (List<ByamlPathPoint> path in node)
@@ -813,6 +735,12 @@ namespace ByamlExt.Byaml
             {
                 WritePathNode(writer, path);
             }
+        }
+
+        private class EnumerableNode
+        {
+            internal IEnumerable Node;
+            internal uint Offset;
         }
 
         private void WritePathNode(BinaryDataWriter writer, List<ByamlPathPoint> node)
@@ -836,7 +764,7 @@ namespace ByamlExt.Byaml
 
         // ---- Helper methods ----
 
-        static internal ByamlNodeType GetNodeType(dynamic node, bool isInternalNode = false)
+		static internal ByamlNodeType GetNodeType(dynamic node, bool isInternalNode = false)
         {
             if (isInternalNode)
             {
@@ -854,11 +782,11 @@ namespace ByamlExt.Byaml
                 else if (node is bool) return ByamlNodeType.Boolean;
                 else if (node is int) return ByamlNodeType.Integer;
                 else if (node is float) return ByamlNodeType.Float; /*TODO decimal is float or double ? */
-                else if (node is uint) return ByamlNodeType.Uinteger;
-                else if (node is Int64) return ByamlNodeType.Long;
-                else if (node is UInt64) return ByamlNodeType.ULong;
-                else if (node is double) return ByamlNodeType.Double;
-                else if (node == null) return ByamlNodeType.Null;
+				else if (node is uint)	return ByamlNodeType.Uinteger;
+				else if (node is Int64) return ByamlNodeType.Long;
+				else if (node is UInt64) return ByamlNodeType.ULong;
+				else if (node is double) return ByamlNodeType.Double;
+				else if (node == null) return ByamlNodeType.Null;
                 else throw new ByamlException($"Type '{node.GetType()}' is not supported as a BYAML node.");
             }
         }
@@ -900,59 +828,58 @@ namespace ByamlExt.Byaml
         }
     }
 
-    public static class IEnumerableCompare
-    {
+	public static class IEnumerableCompare
+	{
+		private static bool IDictionaryIsEqual(IDictionary<string, dynamic> a, IDictionary<string, dynamic> b)
+		{
+			if (a.Count != b.Count) return false;
+			foreach (string key in a.Keys)
+			{
+				if (!b.ContainsKey(key)) return false;
+				if ((a[key] == null && b[key] != null) || (a[key] != null && b[key] == null)) return false;
+				else if (a[key] == null && b[key] == null) continue;
 
-        private static bool IDictionaryIsEqual(IDictionary<string, dynamic> a, IDictionary<string, dynamic> b)
-        {
-            if (a.Count != b.Count) return false;
-            foreach (string key in a.Keys)
-            {
-                if (!b.ContainsKey(key)) return false;
-                if ((a[key] == null && b[key] != null) || (a[key] != null && b[key] == null)) return false;
-                else if (a[key] == null && b[key] == null) continue;
+				if (TypeNotEqual(a[key].GetType(), b[key].GetType())) return false;
 
-                if (TypeNotEqual(a[key].GetType(), b[key].GetType())) return false;
+				if (a[key] is IList<dynamic> && IListIsEqual(a[key], b[key])) continue;
+				else if (a[key] is IDictionary<string, dynamic> && IDictionaryIsEqual(a[key], b[key])) continue;
+				else if (a[key] == b[key]) continue;
 
-                if (a[key] is IList<dynamic> && IListIsEqual(a[key], b[key])) continue;
-                else if (a[key] is IDictionary<string, dynamic> && IDictionaryIsEqual(a[key], b[key])) continue;
-                else if (a[key] == b[key]) continue;
+				return false;
+			}
+			return true;
+		}
 
-                return false;
-            }
-            return true;
-        }
+		private static bool IListIsEqual(IList<dynamic> a, IList<dynamic> b)
+		{
+			if (a.Count != b.Count) return false;
+			for (int i = 0; i < a.Count; i++)
+			{
+				if ((a[i] == null && b[i] != null) || (a[i] != null && b[i] == null)) return false;
+				else if (a[i] == null && b[i] == null) continue;
 
-        private static bool IListIsEqual(IList<dynamic> a, IList<dynamic> b)
-        {
-            if (a.Count != b.Count) return false;
-            for (int i = 0; i < a.Count; i++)
-            {
-                if ((a[i] == null && b[i] != null) || (a[i] != null && b[i] == null)) return false;
-                else if (a[i] == null && b[i] == null) continue;
+				if (TypeNotEqual(a[i].GetType(), b[i].GetType())) return false;
 
-                if (TypeNotEqual(a[i].GetType(), b[i].GetType())) return false;
+				if (a[i] is IList<dynamic> && IListIsEqual(a[i], b[i])) continue;
+				else if (a[i] is IDictionary<string, dynamic> && IDictionaryIsEqual(a[i], b[i])) continue;
+				else if (a[i] == b[i]) continue;
 
-                if (a[i] is IList<dynamic> && IListIsEqual(a[i], b[i])) continue;
-                else if (a[i] is IDictionary<string, dynamic> && IDictionaryIsEqual(a[i], b[i])) continue;
-                else if (a[i] == b[i]) continue;
+				return false;
+			}
+			return true;
+		}
 
-                return false;
-            }
-            return true;
-        }
+		public static bool TypeNotEqual(Type a, Type b)
+		{
+			return !(a.IsAssignableFrom(b) || b.IsAssignableFrom(a)); // without this LinksNode wouldn't be equal to IDictionary<string,dynamic>
+		}
 
-        public static bool TypeNotEqual(Type a, Type b)
-        {
-            return !(a.IsAssignableFrom(b) || b.IsAssignableFrom(a)); // without this LinksNode wouldn't be equal to IDictionary<string,dynamic>
-        }
-
-        public static bool IsEqual(IEnumerable a, IEnumerable b)
-        {
-            if (TypeNotEqual(a.GetType(), b.GetType())) return false;
-            if (a is IDictionary) return IDictionaryIsEqual((IDictionary<string, dynamic>)a, (IDictionary<string, dynamic>)b);
-            else if (a is IList<ByamlPathPoint>) return ((IList<ByamlPathPoint>)a).SequenceEqual((IList<ByamlPathPoint>)b);
-            else return IListIsEqual((IList<dynamic>)a, (IList<dynamic>)b);
-        }
-    }
+		public static bool IsEqual(IEnumerable a, IEnumerable b)
+		{
+			if (TypeNotEqual(a.GetType(), b.GetType())) return false;
+			if (a is IDictionary) return IDictionaryIsEqual((IDictionary<string, dynamic>)a, (IDictionary<string, dynamic>)b);
+			else if (a is IList<ByamlPathPoint>) return ((IList<ByamlPathPoint>)a).SequenceEqual((IList<ByamlPathPoint>)b);
+			else return IListIsEqual((IList<dynamic>)a, (IList<dynamic>)b);
+		}
+	}
 }

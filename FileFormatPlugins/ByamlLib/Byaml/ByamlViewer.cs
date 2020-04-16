@@ -225,14 +225,15 @@ namespace ByamlExt
 			OpenByml(new FileStream(Filename, FileMode.Open), Filename);
 
 		public static void OpenByml(Stream file, string FileName = "") =>
-			OpenByml(file, FileName);
+			OpenByml(file, FileName, SupportPaths());
 
 		public static void OpenByml(Stream file, string FileName, bool paths) =>
-			OpenByml(file, FileName, null, false);
+			OpenByml(file, FileName, paths, null, false);
 
-		public static void OpenByml(Stream file, string FileName, Stream saveStream, bool AsDialog)
+		public static void OpenByml(Stream file, string FileName, bool? paths, Stream saveStream, bool AsDialog)
 		{
-			var byml = ByamlFile.LoadN(file);
+			bool _paths = paths == null ? SupportPaths() : paths.Value;
+			var byml = ByamlFile.LoadN(file, _paths);
 			OpenByml(byml, FileName, saveStream, AsDialog);
 		}
 

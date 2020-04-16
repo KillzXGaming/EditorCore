@@ -171,11 +171,11 @@ namespace KCLExt
             {
                 IDictionary<string, dynamic> colCodes = new Dictionary<string, dynamic>();
                 colCodes.Add("CameraCode", CameraCodes[entry.CameraCode]);
-                colCodes.Add("FloorCodes", FloorCodes[entry.FloorCode]);
+                colCodes.Add("FloorCode", FloorCodes[entry.FloorCode]);
                 if (entry.MaterialPrefixCode != "NONE")
                     colCodes.Add("MaterialCodePrefix", MaterialPrefixCodes[entry.MaterialPrefixCode]);
-                colCodes.Add("MaterialCodes", MaterialCodes[entry.MaterialCode]);
-                colCodes.Add("WallCodes", WallCodes[entry.WallCode]);
+                colCodes.Add("MaterialCode", MaterialCodes[entry.MaterialCode]);
+                colCodes.Add("WallCode", WallCodes[entry.WallCode]);
                 root.Add(colCodes);
             }
 

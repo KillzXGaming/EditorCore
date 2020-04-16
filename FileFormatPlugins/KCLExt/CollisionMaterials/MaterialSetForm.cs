@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -20,17 +20,30 @@ namespace KCLExt
         public string[] Materials;
         public string[] Meshes;
 
+        public List<CollisionEntry> MatCollisionList = new List<CollisionEntry>();
+        public List<CollisionEntry> MeshCollisionList = new List<CollisionEntry>();
+
         public bool UseObjectMaterials => radioBtnMats.Checked;
 
         private MaterialGridView DataGridView;
         private OdysseyCollisionPicker OdysseyCollisionPicker;
+        private MaterialCollisionPicker MaterialCollisionPicker;
+
         private MaterialSetForm(string[] mats, string[] meshes)
 		{
             Meshes = meshes;
             Materials = mats;
             InitializeComponent();
 
-            chkOdysseyTypeEditor.Visible = false;
+            for (int i = 0; i < Materials.Length; i++)
+                MatCollisionList.Add(new CollisionEntry(Materials[i]));
+            for (int i = 0; i < Meshes.Length; i++)
+                MeshCollisionList.Add(new CollisionEntry(Meshes[i]));
+
+            foreach (var preset in MarioKart.MK7.KCL.CollisionPresets)
+                gameSelectToolStripMenuItem.DropDownItems.Add(new ToolStripMenuItem(preset.GameTitle,
+                    null, GamePresetToolStripMenuItem_Click));
+
             radioBtnMats.Checked = true;
             SetMaterialEditor();
             ReloadDataList();
@@ -41,15 +54,25 @@ namespace KCLExt
         private void SetMaterialEditor()
         {
             panel1.Controls.Clear();
-            if (chkOdysseyTypeEditor.Checked && ActiveGamePreset == ActivePreset.SMO)
+            if (ActiveGamePreset != null && chkPresetTypeEditor.Checked && ActiveGamePreset.GameTitle == "Mario Odyssey")
             {
                 DataGridView = null;
+                MaterialCollisionPicker = null;
                 OdysseyCollisionPicker = new OdysseyCollisionPicker(this);
                 OdysseyCollisionPicker.Dock = DockStyle.Fill;
                 panel1.Controls.Add(OdysseyCollisionPicker);
             }
+            else if (ActiveGamePreset != null && ActiveGamePreset.MaterialPresets?.Count > 0 && chkPresetTypeEditor.Checked)
+            {
+                DataGridView = null;
+                OdysseyCollisionPicker = null;
+                MaterialCollisionPicker = new MaterialCollisionPicker(this);
+                MaterialCollisionPicker.Dock = DockStyle.Fill;
+                panel1.Controls.Add(MaterialCollisionPicker);
+            }
             else
             {
+                MaterialCollisionPicker = null;
                 OdysseyCollisionPicker = null;
                 DataGridView = new MaterialGridView(this);
                 DataGridView.Dock = DockStyle.Fill;
@@ -57,27 +80,18 @@ namespace KCLExt
             }
         }
 
-        public static ActivePreset ActiveGamePreset = ActivePreset.None;
-
-        public enum ActivePreset
-        {
-            None,
-            SMO,
-            MK8,
-            Splatoon2,
-            Splatoon,
-            Other,
-        }
+        public static CollisionPresetData ActiveGamePreset = null;
 
         public void ReloadDataList()
         {
-            if (DataGridView != null) {
-                DataGridView.ReloadDataList();
-            }
-            else
-            {
+            var colList = UseObjectMaterials ? MatCollisionList : MeshCollisionList;
+
+            if (DataGridView != null) 
+                DataGridView.ReloadDataList(colList);
+            else if (MaterialCollisionPicker != null)
+                MaterialCollisionPicker.ReloadDataList(colList);
+            else if (OdysseyCollisionPicker != null)
                 OdysseyCollisionPicker.ReloadDataList();
-            }
         }
 
         public static MaterialSetForm ShowForm(string[] materials, string[] meshes)
@@ -91,63 +105,52 @@ namespace KCLExt
 		{
             if (DataGridView != null)
                 Result = DataGridView.Result;
-            else
+            else if (MaterialCollisionPicker != null)
+                Result = MaterialCollisionPicker.Result;
+            else if (OdysseyCollisionPicker != null)
             {
                 Result = OdysseyCollisionPicker.Result;
                 AttributeByml = OdysseyCollisionPicker.GenerateByaml();
             }
-		}
+
+            if (DataGridView != null)
+                DataGridView.Dispose();
+            if (MaterialCollisionPicker != null)
+                MaterialCollisionPicker.Dispose();
+            if (OdysseyCollisionPicker != null)
+                OdysseyCollisionPicker.Dispose();
+        }
 
 		private void applyToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-            if (ActiveGamePreset == ActivePreset.None)
+            if (ActiveGamePreset == null)
             {
                 MessageBox.Show("Make sure to choose a game preset first!");
                 return;
             }
 
-            if (DataGridView != null)
+            if (DataGridView != null) {
                 DataGridView.EndEdit();
+            }
             this.Close();
-		}
+        }
 
         private void GamePresetToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (DataGridView != null)
-                DataGridView.MaterialPreset.Clear();
-
-            marioOdysseyToolStripMenuItem.Checked = false;
-            Mk8PresetToolstrip.Checked = false;
-            Splatoon2PresetToolstrip.Checked = false;
-            SplatoonPresetToolstrip.Checked = false;
-            OtherPresetToolstrip.Checked = false;
+            foreach (ToolStripMenuItem menu in gameSelectToolStripMenuItem.DropDownItems)
+                menu.Checked = false;
 
             if (sender is ToolStripMenuItem) {
                 ((ToolStripMenuItem)sender).Checked = true;
 
                 string name = ((ToolStripMenuItem)sender).Text;
-                if (name == "Mario Odyssey")
-                {
-                    ActiveGamePreset = ActivePreset.SMO;
-                    chkOdysseyTypeEditor.Visible = true;
+                foreach (var preset in MarioKart.MK7.KCL.CollisionPresets) {
+                    if (name == preset.GameTitle) {
+                        ActiveGamePreset = preset;
+                    }
                 }
-                else if (name == "Mario Kart 8 Wii U / Deluxe")
-                    ActiveGamePreset = ActivePreset.MK8;
-                else if (name == "Splatoon 2")
-                    ActiveGamePreset = ActivePreset.Splatoon2;
-                else if (name == "Splatoon")
-                    ActiveGamePreset = ActivePreset.Splatoon;
-                else
-                    ActiveGamePreset = ActivePreset.Other;
-
-                if (ActiveGamePreset != ActivePreset.SMO)
-                    chkOdysseyTypeEditor.Visible = false;
 
                 SetMaterialEditor();
-
-                if (ActiveGamePreset == ActivePreset.MK8)
-                    DataGridView.LoadMk8TypePresets();
-
                 ReloadDataList();
             }
         }

@@ -18,6 +18,38 @@ namespace SARCExt
 
     public static class SARC
     {
+        static SAHT mk8HashTable;
+        static SAHT MK8HashTable
+        {
+            get {
+                if (mk8HashTable == null)
+                    mk8HashTable = new SAHT(Properties.Resources.Mario_Kart_8);
+                return mk8HashTable;
+            }
+        }
+
+        static SAHT mk8dHashTable;
+        static SAHT MK8DHashTable
+        {
+            get
+            {
+                if (mk8dHashTable == null)
+                    mk8dHashTable = new SAHT(Properties.Resources.Mario_Kart_8_Deluxe);
+                return mk8dHashTable;
+            }
+        }
+
+        static SAHT mkk7HashTable;
+        static SAHT MK7HashTable
+        {
+            get
+            {
+                if (mkk7HashTable == null)
+                    mkk7HashTable = new SAHT(Properties.Resources.Mario_Kart_7);
+                return mkk7HashTable;
+            }
+        }
+
         static uint NameHash(string name)
         {
             uint result = 0;
@@ -28,19 +60,18 @@ namespace SARCExt
             return result;
         }
 
-		static uint StringHashToUint(string name)
-		{
-			if (name.Contains("."))
-				name = name.Split('.')[0];
-			if (name.Length != 8) throw new Exception("Invalid hash length");
-			return Convert.ToUInt32(name, 16);
-		}
+        static uint StringHashToUint(string name)
+        {
+            if (name.Contains("."))
+                name = name.Split('.')[0];
+            if (name.Length != 8) throw new Exception("Invalid hash length");
+            return Convert.ToUInt32(name, 16);
+        }
 
-		//From https://github.com/aboood40091/SarcLib/
-		public static string GuessFileExtension(byte[] f)
+        //From https://github.com/aboood40091/SarcLib/
+        public static string GuessFileExtension(byte[] f)
         {
             string Ext = ".bin";
-
             if (f.Matches("SARC")) Ext = ".sarc";
             else if (f.Matches("Yaz")) Ext = ".szs";
             else if (f.Matches("YB") || f.Matches("BY")) Ext = ".byaml";
@@ -70,6 +101,7 @@ namespace SARCExt
             else if (f.Matches("AAMP")) Ext = ".aamp";
             else if (f.Matches("MsgStdBn")) Ext = ".msbt";
             else if (f.Matches("MsgPrjBn")) Ext = ".msbp";
+            else if (f.Matches((uint)(f.Length - 0x28), "FLIM")) Ext = ".bflim";
             return Ext;
         }
 
@@ -86,19 +118,21 @@ namespace SARCExt
 
 		public static uint GuessFileAlignment(byte[] f)
 		{
-			if (f.Matches("SARC")) return 0x2000;
-			else if (f.Matches("Yaz")) return 0x80;
-			else if (f.Matches("YB") || f.Matches("BY")) return 0x80;
-			else if (f.Matches("FRES") || f.Matches("Gfx2") || f.Matches("AAHS") || f.Matches("BAHS")) return 0x2000;
-			else if (f.Matches("BNTX") || f.Matches("BNSH") || f.Matches("FSHA")) return 0x1000;
-			else if (f.Matches("FFNT")) return 0x2000;
-			else if (f.Matches("CFNT")) return 0x80;
-			else if (f.Matches(1, "STM") /* *STM */ || f.Matches(1, "WAV") || f.Matches("FSTP")) return 0x20;
-			else if (f.Matches("CTPK")) return 0x10;
-			else if (f.Matches("CGFX")) return 0x80;
-			else if (f.Matches("AAMP")) return 8;
-			else if (f.Matches("MsgStdBn") || f.Matches("MsgPrjBn")) return 0x80;
-			else return 0x4;
+            if (f.Matches("SARC")) return 0x2000;
+            else if (f.Matches("Yaz")) return 0x80;
+            else if (f.Matches("YB") || f.Matches("BY")) return 0x80;
+            else if (f.Matches("FRES") || f.Matches("Gfx2") || f.Matches("AAHS") || f.Matches("BAHS")) return 0x2000;
+            else if (f.Matches("EFTF") || f.Matches("VFXB") || f.Matches("SPBD")) return 0x2000;
+            else if (f.Matches("BNTX") || f.Matches("BNSH") || f.Matches("FSHA")) return 0x1000;
+            else if (f.Matches("FFNT")) return 0x2000;
+            else if (f.Matches("CFNT")) return 0x80;
+            else if (f.Matches(1, "STM") /* *STM */ || f.Matches(1, "WAV") || f.Matches("FSTP")) return 0x20;
+            else if (f.Matches("CTPK")) return 0x10;
+            else if (f.Matches("CGFX")) return 0x80;
+            else if (f.Matches("AAMP")) return 8;
+            else if (f.Matches("MsgStdBn") || f.Matches("MsgPrjBn")) return 0x80;
+            else if (f.Matches((uint)(f.Length - 0x28), "FLIM")) return (uint)f.GetAlignment((uint)(f.Length - 8), typeof(ushort));
+            else return 0x4;
 		}
 
 		public static Tuple<int, byte[]> PackN(SarcData data, int _align = -1)
@@ -120,9 +154,9 @@ namespace SARCExt
 			bw.Write((UInt16)data.Files.Keys.Count);
 			bw.Write((UInt32)0x00000065);
 			List<uint> offsetToUpdate = new List<uint>();
-			
-			//Sort files by hash
-			string[] Keys = data.Files.Keys.OrderBy(x => data.HashOnly ? StringHashToUint(x) : NameHash(x)).ToArray();
+
+            //Sort files by hash
+            string[] Keys = data.Files.Keys.OrderBy(x => data.HashOnly ? StringHashToUint(x) : NameHash(x)).ToArray();
 			foreach (string k in Keys)
 			{
 				if (data.HashOnly)
@@ -138,13 +172,24 @@ namespace SARCExt
 			bw.Write((UInt16)0x8);
 			bw.Write((UInt16)0);
 			List<uint> StringOffsets = new List<uint>();
-			foreach (string k in Keys)
-			{
-				StringOffsets.Add((uint)bw.BaseStream.Position);
-				bw.Write(k, BinaryStringFormat.ZeroTerminated);
-				bw.Align(4);
-			}
-			bw.Align(0x1000); //TODO: check if works in odyssey
+
+            if (!data.HashOnly)
+            {
+                foreach (string k in Keys)
+                {
+                    StringOffsets.Add((uint)bw.BaseStream.Position);
+                    bw.Write(k, BinaryStringFormat.ZeroTerminated);
+                    bw.Align(4);
+                }
+            }
+
+            int MaxAlignment = 0;
+            foreach (string k in Keys)
+            {
+                MaxAlignment = Math.Max(MaxAlignment, (int)GuessFileAlignment(data.Files[k]));
+            }
+
+            bw.Align(MaxAlignment); //TODO: check if works in odyssey
 			List<uint> FileOffsets = new List<uint>();
 			foreach (string k in Keys)
 			{
@@ -174,7 +219,7 @@ namespace SARCExt
 
 		public static SarcData UnpackRamN(Stream src)
 		{
-			Dictionary<string, byte[]> res = new Dictionary<string, byte[]>();
+            Dictionary<string, byte[]> res = new Dictionary<string, byte[]>();
 			BinaryDataReader br = new BinaryDataReader(src, false);
 			br.ByteOrder = ByteOrder.LittleEndian;
 			br.BaseStream.Position = 6;
@@ -216,11 +261,26 @@ namespace SARCExt
 				if (sfat.nodes[m].fileBool == 1)
 					res.Add(sfnt.fileNames[m], temp);
 				else
-					res.Add(sfat.nodes[m].hash.ToString("X8") + GuessFileExtension(temp), temp);
-			}
+                {
+                    res.Add(sfat.nodes[m].hash.ToString("X8") + GuessFileExtension(temp), temp);
+                }
+            }
 
 			return new SarcData() {endianness = br.ByteOrder, HashOnly = HashOnly, Files = res };
 		}
+
+        public static string TryGetNameFromHashTable(string Hash)
+        {
+            uint hash = (uint)StringHashToUint(Hash);
+            if (MK8HashTable.HashEntries.ContainsKey(hash))
+                return MK8HashTable.HashEntries[hash];
+            else if (MK8DHashTable.HashEntries.ContainsKey(hash))
+                return MK8DHashTable.HashEntries[hash];
+            else if (MK7HashTable.HashEntries.ContainsKey(hash))
+                return MK7HashTable.HashEntries[hash];
+            else
+                return Hash;
+        }
 
 		[Obsolete("This has been kept for compatibility, use PackN instead")]
 		public static byte[] pack(Dictionary<string, byte[]> files, int align = -1, ByteOrder endianness = ByteOrder.LittleEndian) =>

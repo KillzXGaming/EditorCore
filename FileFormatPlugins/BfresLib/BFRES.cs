@@ -64,8 +64,6 @@ namespace Smash_Forge
 
         public void Read(byte[] file)
         {
-            Console.WriteLine("reading bfres");
-
             FileData f = new FileData(file);
             f.Endian = Endianness.Big;
             f.seek(0);
@@ -249,33 +247,9 @@ namespace Smash_Forge
                             padding = f.readInt(),
 
                         };
-
                         string FMATNameOffset = fmat_info.name;
                         // //Console.WriteLine($"{FMATNameOffset} {fmat_info.texSelCount} ");
                         FMATheaders.Add(fmat_info);
-
-                        int readerPos = f.pos();
-
-                        if (fmat_info.texAttIndxOff != 0)
-                        {
-                            f.seek((int)fmat_info.texAttIndxOff);
-                            f.readInt(); //sig
-                            int samplerCount = f.readInt();
-                            for (int s = 0; s < samplerCount + 1; s++)
-                            {
-                                f.readInt(); //key
-                                f.readInt(); //index
-                                var nameOffset = f.readInt64();
-                                if (nameOffset != 0 && s != 0)
-                                {
-                                    string samName = f.readString((int)nameOffset + 2, -1);
-                                    Console.WriteLine($"nameOffset {nameOffset} samName {samName}");
-                                    fmat_info.samplers.Add(samName);
-                                }
-                            }
-                        }
-
-                        f.seek(readerPos);
                     }
 
                     f.seek((int)fmdl_info.fsklOff + 16);
@@ -426,8 +400,6 @@ namespace Smash_Forge
                             //So these work by grabbing the RLT offset first and then adding the buffer offset. Then they keep adding each other by their buffer sizes
                             if (buff == 0) data.DataOffset = (DataStart + FVTXArr[FSHPArr[m].fvtxIndx].buffOff);
                             if (buff > 0) data.DataOffset = BuffArr[buff - 1].DataOffset + BuffArr[buff - 1].buffSize;
-
-                            //Align by 8
                             if (data.DataOffset % 8 != 0) data.DataOffset = data.DataOffset + (8 - (data.DataOffset % 8));
 
                             BuffArr.Add(data);
@@ -584,14 +556,11 @@ namespace Smash_Forge
 
 
                         f.seek((int)FMATheaders[FSHPArr[m].fmatIndx].texSelOff);
-                        List<TextureMap> MatTexList = new List<TextureMap>();
+                        List<string> MatTexList = new List<string>();
                         for (int tex = 0; FMATheaders[FSHPArr[m].fmatIndx].texAttSelCount > tex; tex++)
                         {
-                            TextureMap textureMap = new TextureMap();
-                            textureMap.Sampler = FMATheaders[FSHPArr[m].fmatIndx].samplers[tex];
                             string TextureName = f.readString((int)f.readInt64() + 2, -1).ToLower();
-                            textureMap.Name = TextureName;
-                            MatTexList.Add(textureMap);
+                            MatTexList.Add(TextureName);
                         }
 
                         if (MatTexList.Count > 0)
@@ -608,12 +577,6 @@ namespace Smash_Forge
                 }
             }
         }        
-
-        public class TextureMap
-        {
-            public string Name { get; set; }
-            public string Sampler { get; set; }
-        }
 
         public class FMDLheader
         {
@@ -693,8 +656,6 @@ namespace Smash_Forge
             public int rawParamDataSize;
             public int userDataCount;
             public int u4;
-
-            public List<string> samplers = new List<string>();
         }
         public class FSKLH
         {
@@ -781,7 +742,7 @@ namespace Smash_Forge
         {
             public List<List<int>> faces = new List<List<int>>();
             public List<Vertex> vertices = new List<Vertex>();
-            public List<TextureMap> texNames = new List<TextureMap>();
+            public List<string> texNames = new List<string>();
             public string name;
         }
 

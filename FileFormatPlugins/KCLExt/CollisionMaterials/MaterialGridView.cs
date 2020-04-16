@@ -14,12 +14,8 @@ namespace KCLExt
     {
         private MaterialSetForm ParentEditor;
 
-        public string[] Materials => ParentEditor.Materials;
-        public string[] Meshes => ParentEditor.Meshes;
-
         public bool UseObjectMaterials => ParentEditor.UseObjectMaterials;
 
-        public List<string> MaterialPreset = new List<string>();
         private DataGridViewComboBoxColumn presetsCB;
 
         public Dictionary<string, ushort> Result
@@ -41,78 +37,14 @@ namespace KCLExt
             InitializeComponent();
 
             ParentEditor = parentForm;
-            presetsCB = new DataGridViewComboBoxColumn();
-            presetsCB.Width = 140;
-            presetsCB.HeaderText = "Presets";
-            presetsCB.DataPropertyName = "Type";
-            dataGridView1.Columns.Add(presetsCB);
-
-            dataGridView1.CellValueChanged +=
-       new DataGridViewCellEventHandler(dataGridView1_CellValueChanged);
-            dataGridView1.CurrentCellDirtyStateChanged +=
-                 new EventHandler(dataGridView1_CurrentCellDirtyStateChanged);
-
-            if (this.dataGridView1.IsCurrentCellDirty)
-            {
-                // This fires the cell value changed handler below
-                dataGridView1.CommitEdit(DataGridViewDataErrorContexts.Commit);
-            }
         }
 
-        public void ReloadDataList()
+        public void ReloadDataList(List<CollisionEntry> entries)
         {
-            presetsCB.DataSource = MaterialPreset;
-
             dataGridView1.Rows.Clear();
 
-            if (UseObjectMaterials)
-            {
-                for (int i = 0; i < Materials.Length; i++)
-                    dataGridView1.Rows.Add(Materials[i], 0);
-            }
-            else
-            {
-                for (int i = 0; i < Meshes.Length; i++)
-                    dataGridView1.Rows.Add(Meshes[i], 0);
-            }
-
-            for (int i = 0; i < dataGridView1.Rows.Count; i++)
-            {
-                if (dataGridView1.Rows[i].Cells[2] is DataGridViewComboBoxCell)
-                {
-                    var cb = ((DataGridViewComboBoxCell)dataGridView1.Rows[i].Cells[2]);
-                    if (cb.Items.Count > 0)
-                    {
-                        cb.Value = cb.Items[0];
-                    }
-                }
-            }
-        }
-
-        private void dataGridView1_CurrentCellDirtyStateChanged(object sender,
-        EventArgs e)
-        {
-
-        }
-
-        private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex == -1) return;
-
-            DataGridViewComboBoxCell cb = (DataGridViewComboBoxCell)dataGridView1.Rows[e.RowIndex].Cells[2];
-            if (cb.Value != null)
-            {
-                dataGridView1.Invalidate();
-                string key = (string)cb.Value;
-                if (MaterialSetForm.ActiveGamePreset == MaterialSetForm.ActivePreset.MK8)
-                {
-                    if (CollisionMk8.ContainsKey(key))
-                    {
-                        dataGridView1.Rows[e.RowIndex].Cells[1].Value = CollisionMk8[key];
-                    }
-                }
-
-                dataGridView1.RefreshEdit();
+            for (int i = 0; i < entries.Count; i++) {
+                dataGridView1.Rows.Add(entries[i].Name, entries[i].TypeID);
             }
         }
 
@@ -120,12 +52,6 @@ namespace KCLExt
             dataGridView1.EndEdit();
         }
 
-        public void LoadMk8TypePresets()
-        {
-            MaterialPreset.Clear();
-            foreach (var item in CollisionMk8.Keys)
-                MaterialPreset.Add(item);
-        }
 
         private Dictionary<string, int> CollisionMk8 = new Dictionary<string, int>()
         {

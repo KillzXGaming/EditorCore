@@ -364,7 +364,12 @@ namespace ExtensionMethods
 		public static bool Matches(this byte[] arr, uint startIndex, string magic) =>
 			arr.Matches(startIndex, magic.ToCharArray());
 
-		public static bool Matches(this byte[] arr, uint startIndex, params char[] magic)
+        public static uint GetAlignment(this byte[] arr, uint startIndex, Type dataType)
+        {
+            return ((uint)arr[arr.Length - 8] << 8 | (uint)arr[arr.Length - 7]);
+        }
+
+        public static bool Matches(this byte[] arr, uint startIndex, params char[] magic)
 		{
 			if (arr.Length < magic.Length + startIndex) return false;
 			for (uint i = 0; i < magic.Length; i++)

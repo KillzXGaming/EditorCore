@@ -31,14 +31,9 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.applyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameSelectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.marioOdysseyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.Mk8PresetToolstrip = new System.Windows.Forms.ToolStripMenuItem();
-            this.Splatoon2PresetToolstrip = new System.Windows.Forms.ToolStripMenuItem();
-            this.SplatoonPresetToolstrip = new System.Windows.Forms.ToolStripMenuItem();
-            this.OtherPresetToolstrip = new System.Windows.Forms.ToolStripMenuItem();
             this.radioBtnMats = new System.Windows.Forms.RadioButton();
             this.radioBtnMeshes = new System.Windows.Forms.RadioButton();
-            this.chkOdysseyTypeEditor = new System.Windows.Forms.CheckBox();
+            this.chkPresetTypeEditor = new System.Windows.Forms.CheckBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -63,50 +58,9 @@
             // 
             // gameSelectToolStripMenuItem
             // 
-            this.gameSelectToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.marioOdysseyToolStripMenuItem,
-            this.Mk8PresetToolstrip,
-            this.Splatoon2PresetToolstrip,
-            this.SplatoonPresetToolstrip,
-            this.OtherPresetToolstrip});
             this.gameSelectToolStripMenuItem.Name = "gameSelectToolStripMenuItem";
             this.gameSelectToolStripMenuItem.Size = new System.Drawing.Size(84, 20);
             this.gameSelectToolStripMenuItem.Text = "Game Select";
-            // 
-            // marioOdysseyToolStripMenuItem
-            // 
-            this.marioOdysseyToolStripMenuItem.Name = "marioOdysseyToolStripMenuItem";
-            this.marioOdysseyToolStripMenuItem.Size = new System.Drawing.Size(216, 22);
-            this.marioOdysseyToolStripMenuItem.Text = "Mario Odyssey";
-            this.marioOdysseyToolStripMenuItem.Click += new System.EventHandler(this.GamePresetToolStripMenuItem_Click);
-            // 
-            // Mk8PresetToolstrip
-            // 
-            this.Mk8PresetToolstrip.Name = "Mk8PresetToolstrip";
-            this.Mk8PresetToolstrip.Size = new System.Drawing.Size(216, 22);
-            this.Mk8PresetToolstrip.Text = "Mario Kart 8 Wii U / Deluxe";
-            this.Mk8PresetToolstrip.Click += new System.EventHandler(this.GamePresetToolStripMenuItem_Click);
-            // 
-            // Splatoon2PresetToolstrip
-            // 
-            this.Splatoon2PresetToolstrip.Name = "Splatoon2PresetToolstrip";
-            this.Splatoon2PresetToolstrip.Size = new System.Drawing.Size(216, 22);
-            this.Splatoon2PresetToolstrip.Text = "Splatoon 2";
-            this.Splatoon2PresetToolstrip.Click += new System.EventHandler(this.GamePresetToolStripMenuItem_Click);
-            // 
-            // SplatoonPresetToolstrip
-            // 
-            this.SplatoonPresetToolstrip.Name = "SplatoonPresetToolstrip";
-            this.SplatoonPresetToolstrip.Size = new System.Drawing.Size(216, 22);
-            this.SplatoonPresetToolstrip.Text = "Splatoon";
-            this.SplatoonPresetToolstrip.Click += new System.EventHandler(this.GamePresetToolStripMenuItem_Click);
-            // 
-            // OtherPresetToolstrip
-            // 
-            this.OtherPresetToolstrip.Name = "OtherPresetToolstrip";
-            this.OtherPresetToolstrip.Size = new System.Drawing.Size(216, 22);
-            this.OtherPresetToolstrip.Text = "Other";
-            this.OtherPresetToolstrip.Click += new System.EventHandler(this.GamePresetToolStripMenuItem_Click);
             // 
             // radioBtnMats
             // 
@@ -134,18 +88,16 @@
             this.radioBtnMeshes.CheckedChanged += new System.EventHandler(this.radioBtnMeshes_CheckedChanged);
             this.radioBtnMeshes.Click += new System.EventHandler(this.radioBtnMeshes_Click);
             // 
-            // chkOdysseyTypeEditor
+            // chkPresetTypeEditor
             // 
-            this.chkOdysseyTypeEditor.AutoSize = true;
-            this.chkOdysseyTypeEditor.Checked = true;
-            this.chkOdysseyTypeEditor.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkOdysseyTypeEditor.Location = new System.Drawing.Point(404, 5);
-            this.chkOdysseyTypeEditor.Name = "chkOdysseyTypeEditor";
-            this.chkOdysseyTypeEditor.Size = new System.Drawing.Size(126, 17);
-            this.chkOdysseyTypeEditor.TabIndex = 4;
-            this.chkOdysseyTypeEditor.Text = "Odyssey Type  Editor";
-            this.chkOdysseyTypeEditor.UseVisualStyleBackColor = true;
-            this.chkOdysseyTypeEditor.CheckedChanged += new System.EventHandler(this.chkOdysseyTypeEditor_CheckedChanged);
+            this.chkPresetTypeEditor.AutoSize = true;
+            this.chkPresetTypeEditor.Location = new System.Drawing.Point(404, 5);
+            this.chkPresetTypeEditor.Name = "chkPresetTypeEditor";
+            this.chkPresetTypeEditor.Size = new System.Drawing.Size(86, 17);
+            this.chkPresetTypeEditor.TabIndex = 4;
+            this.chkPresetTypeEditor.Text = "Preset Editor";
+            this.chkPresetTypeEditor.UseVisualStyleBackColor = true;
+            this.chkPresetTypeEditor.CheckedChanged += new System.EventHandler(this.chkOdysseyTypeEditor_CheckedChanged);
             // 
             // panel1
             // 
@@ -162,7 +114,7 @@
             this.ClientSize = new System.Drawing.Size(531, 316);
             this.ControlBox = false;
             this.Controls.Add(this.panel1);
-            this.Controls.Add(this.chkOdysseyTypeEditor);
+            this.Controls.Add(this.chkPresetTypeEditor);
             this.Controls.Add(this.radioBtnMeshes);
             this.Controls.Add(this.radioBtnMats);
             this.Controls.Add(this.menuStrip1);
@@ -185,14 +137,9 @@
 		private System.Windows.Forms.MenuStrip menuStrip1;
 		private System.Windows.Forms.ToolStripMenuItem applyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gameSelectToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem marioOdysseyToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem Mk8PresetToolstrip;
-        private System.Windows.Forms.ToolStripMenuItem Splatoon2PresetToolstrip;
-        private System.Windows.Forms.ToolStripMenuItem SplatoonPresetToolstrip;
-        private System.Windows.Forms.ToolStripMenuItem OtherPresetToolstrip;
         private System.Windows.Forms.RadioButton radioBtnMats;
         private System.Windows.Forms.RadioButton radioBtnMeshes;
-        private System.Windows.Forms.CheckBox chkOdysseyTypeEditor;
+        private System.Windows.Forms.CheckBox chkPresetTypeEditor;
         private System.Windows.Forms.Panel panel1;
     }
 }

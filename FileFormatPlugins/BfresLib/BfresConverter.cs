@@ -17,25 +17,23 @@ namespace BfresLib
 {
     public class BfresConverter
     {
-        /// <summary>
-        /// Exports all models from the target bfres to the selected folder.
-        /// Returns array with the converted file names, it's NULL if no models were converted
-        /// </summary>
-        /// <param name="bfres">Source brfs</param>
-        /// <param name="outDir">Target directory</param>
-        /// <returns></returns>
-        public static string[] Convert(byte[] bfres, string outDir)
+		/// <summary>
+		/// Exports all models from the target bfres to the selected folder.
+		/// Returns array with the converted file names, it's NULL if no models were converted
+		/// </summary>
+		/// <param name="bfres">Source brfs</param>
+		/// <param name="outDir">Target directory</param>
+		/// <returns></returns>
+		public static string[] Convert(byte[] bfres, string outDir)
         {
-            Console.WriteLine($"Converting BFRES ");
-
             if (bfres == null) return null;
             BFRES s = new BFRES();
             s.Read(bfres);
             Export(outDir, s);
-            var res = s.models.Count == 0 ? null : s.models.Select(x => x.name).ToArray();
-            s = null;
+			var res = s.models.Count == 0 ? null : s.models.Select(x => x.name).ToArray();
+			s = null;
             GC.Collect();
-            return res;
+			return res;
         }
 
         public static bool GetTextures(byte[] bfres, string Folder)
@@ -55,150 +53,111 @@ namespace BfresLib
         const string textureFolder = "GameTextures";
         internal static void Export(string OutputDir, BFRES model)
         {
-            Console.WriteLine($"Converting OBJ " + OutputDir);
-
-                bool UseEmptyMat = false;
-                List<string> ExportMats = new List<string>();
-                if (model.models.Count > 0)
-                {
-                    List<string> diffuseNames = new List<string>();
-                    foreach (var mdl in model.models)
-                    {
-                        foreach (var poly in mdl.poly)
-                        {
-                            foreach (var tex in poly.texNames)
-                                if (tex.Sampler == "_a0")
-                                {
-                                    diffuseNames.Add(tex.Name);
-                                    Console.WriteLine($"diffuseNames {tex.Name}");
-                                }
-                        }
-                    }
-
+            bool UseEmptyMat = false;
+            List<string> ExportMats = new List<string>();
+            if (model.models.Count > 0)
+            {
                 foreach (BFRES.FMDL_Model fmdl in model.models)
                 {
-                    string FileName = "";
-                    try
+                    string FileName = Path.Combine(OutputDir, fmdl.name + ".obj");
+                    using (System.IO.StreamWriter f = new System.IO.StreamWriter(FileName))
                     {
-                        FileName = Path.Combine(OutputDir, fmdl.name + ".obj");
-                        using (System.IO.StreamWriter f = new System.IO.StreamWriter(FileName))
+                        f.WriteLine($"mtllib {Path.GetFileNameWithoutExtension(FileName)}.mtl");
+                        int vertexOffest = 1;
+                        foreach (var mesh in fmdl.poly)
                         {
-                            f.WriteLine($"mtllib {Path.GetFileNameWithoutExtension(FileName)}.mtl");
-                            int vertexOffest = 1;
-                            foreach (var mesh in fmdl.poly)
+                            bool NoTexture = mesh.vertices[0].tx.Count == 0;
+                            foreach (var v in mesh.vertices)
                             {
-                                bool NoTexture = mesh.vertices[0].tx.Count == 0;
-                                foreach (var v in mesh.vertices)
-                                {
-                                    f.WriteLine($"v {v.pos.X} {v.pos.Y} {v.pos.Z}"); //{v.col.X} {v.col.Y} {v.col.Z} are vertex colors (unsupported for OBJ)
-                                    if (!NoTexture)
-                                        f.WriteLine($"vt {v.tx[0].X } {1 - v.tx[0].Y}");
-                                    else
-                                        f.WriteLine($"vt 0 0"); //Or else offsets won't match
-                                    f.WriteLine($"vn {v.nrm.X} {v.nrm.Y} {v.nrm.Z}");
-                                }
-
-                                if (mesh.texNames.Count == 0)
-                                {
-                                    UseEmptyMat = true;
-                                    NoTexture = true;
-                                    f.WriteLine($"usemtl OdysseyEditor_EmptyMat");
-                                }
+                                f.WriteLine($"v {v.pos.X} {v.pos.Y} {v.pos.Z}"); //{v.col.X} {v.col.Y} {v.col.Z} are vertex colors (unsupported for OBJ)
+                                if (!NoTexture)
+                                    f.WriteLine($"vt {v.tx[0].X } {1 - v.tx[0].Y}");
                                 else
-                                {
-                                    foreach (var m in mesh.texNames)
-                                        if (!ExportMats.Contains(m.Name)) ExportMats.Add(m.Name);
-                                    f.WriteLine($"usemtl {mesh.texNames[0].Name}");
-                                }
-
-                                for (int i = 0; i < mesh.faces.Count; i++)
-                                {
-                                    var verts = mesh.faces[i];
-                                    //Debug.Assert(verts[0] == verts[1] && verts[2] == verts[1]);
-                                    int val = verts[0] + vertexOffest;
-                                    int val1 = verts[1] + vertexOffest;
-                                    int val2 = verts[2] + vertexOffest;
-                                    if (!NoTexture)
-                                        f.WriteLine($"f {val}/{val}/{val} {val1}/{val1}/{val1} {val2}/{val2}/{val2}");
-                                    else
-                                        f.WriteLine($"f {val}//{val} {val1}//{val1} {val2}//{val2}");
-                                }
-                                vertexOffest += mesh.vertices.Count;
+                                    f.WriteLine($"vt 0 0"); //Or else offsets won't match
+                                f.WriteLine($"vn {v.nrm.X} {v.nrm.Y} {v.nrm.Z}");
                             }
-                        }
 
-                        using (System.IO.StreamWriter f = new System.IO.StreamWriter(FileName.Substring(0, FileName.Length - 3) + "mtl"))
-                        {
-                            if (UseEmptyMat)
+                            if (mesh.texNames.Count == 0)
                             {
-                                f.WriteLine($"newmtl OdysseyEditor_EmptyMat");
-                                f.WriteLine($"Ka 0.000000 0.000000 0.000000");
-                                f.WriteLine($"Kd 0.800000 0.800000 0.800000");
-                                f.WriteLine($"Ks 0.0 0.0 0.0 \n");
+                                UseEmptyMat = true;
+                                NoTexture = true;
+                                f.WriteLine($"usemtl OdysseyEditor_EmptyMat");
+                            }
+                            else
+                            {
+                                foreach (string m in mesh.texNames)
+                                    if (!ExportMats.Contains(m)) ExportMats.Add(m);
+                                f.WriteLine($"usemtl {mesh.texNames[0]}");
                             }
 
-                            foreach (string MatName in ExportMats)
+                            for (int i = 0; i < mesh.faces.Count; i++)
                             {
-                                if (!diffuseNames.Contains(MatName)) continue; //If a material texture is missing the mesh will not show, skip non "alb" materials
-                                f.WriteLine($"newmtl {MatName}");
-                                f.WriteLine($"Ka 0.000000 0.000000 0.000000");
-                                f.WriteLine($"Kd 1.000000 1.000000 1.000000");
-                                f.WriteLine($"Ks 0.0 0.0 0.0 ");
-                                f.WriteLine($"map_Kd {textureFolder}/{MatName}.{texFmt}\n");
+                                var verts = mesh.faces[i];
+                                //Debug.Assert(verts[0] == verts[1] && verts[2] == verts[1]);
+                                int val = verts[0] + vertexOffest;
+                                int val1 = verts[1] + vertexOffest;
+                                int val2 = verts[2] + vertexOffest;
+                                if (!NoTexture)
+                                    f.WriteLine($"f {val}/{val}/{val} {val1}/{val1}/{val1} {val2}/{val2}/{val2}");
+                                else
+                                    f.WriteLine($"f {val}//{val} {val1}//{val1} {val2}//{val2}");
                             }
+                            vertexOffest += mesh.vertices.Count;
                         }
                     }
-                    catch (Exception ex)
+
+                    using (System.IO.StreamWriter f = new System.IO.StreamWriter(FileName.Substring(0, FileName.Length - 3) + "mtl"))
                     {
-                        MessageBox.Show($"Failed to export model! Model {fmdl.name} FileName {FileName} Exception: {ex} ");
+                        if (UseEmptyMat)
+                        {
+                            f.WriteLine($"newmtl OdysseyEditor_EmptyMat");
+                            f.WriteLine($"Ka 0.000000 0.000000 0.000000");
+                            f.WriteLine($"Kd 0.800000 0.800000 0.800000");
+                            f.WriteLine($"Ks 0.0 0.0 0.0 \n");
+                        }
+
+                        foreach (string MatName in ExportMats)
+                        {
+                            if (!IsMaterialNameValid(MatName)) continue; //If a material texture is missing the mesh will not show, skip non "alb" materials
+                            f.WriteLine($"newmtl {MatName}");
+                            f.WriteLine($"Ka 0.000000 0.000000 0.000000");
+                            f.WriteLine($"Kd 1.000000 1.000000 1.000000");
+                            f.WriteLine($"Ks 0.0 0.0 0.0 ");
+                            f.WriteLine($"map_Kd {textureFolder}/{MatName}.{texFmt}\n");
+                        }
                     }
                 }
-                
             }
-
 
             ExportTextures(model, OutputDir);
         }
 
-        static void ExportTextures(BFRES bfres, string ModelsFolder)
+        static void ExportTextures(BFRES model,string ModelsFolder)
         {
-            if (bfres.textures.Keys.Count > 0)
+            if (model.textures.Keys.Count > 0)
             {
                 if (!Directory.Exists($"{ModelsFolder}/{textureFolder}"))
                     Directory.CreateDirectory($"{ModelsFolder}/{textureFolder}");
 
-                List<string> diffuseNames = new List<string>();
-                foreach (var mdl in bfres.models)
+                foreach (string k in model.textures.Keys)
                 {
-                    foreach (var poly in mdl.poly)
+                    foreach (var tex in model.textures[k].Textures.Where(
+                        x => IsMaterialNameValid(x.Name)))
                     {
-                        foreach (var tex in poly.texNames)
-                            if (tex.Sampler == "_a0")
-                            {
-                                diffuseNames.Add(tex.Name);
-                                Console.WriteLine($"diffuseNames {tex.Name}");
-                            }
-                    }
-                }
-
-                foreach (string k in bfres.textures.Keys)
-                {
-                    foreach (var tex in bfres.textures[k].Textures)
-                    {
-                        try
-                        {
-                            if (!File.Exists($"{ModelsFolder}/{textureFolder}/{tex.Name}.{texFmt}"))
-                                ExportTexture(tex, $"{ModelsFolder}/{textureFolder}/{tex.Name}.{texFmt}");
-                            else
-                                Console.WriteLine("c texture " + tex.Name);
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show($"Failed to export texture! Texture {tex.Name}" + $" {ModelsFolder}/{textureFolder}/{tex.Name}.{texFmt} " + ex);
-                        }
+                        if (!File.Exists($"{ModelsFolder}/{textureFolder}/{tex.Name}.{texFmt}"))
+                            ExportTexture(tex, $"{ModelsFolder}/{textureFolder}/{tex.Name}.{texFmt}");
+                        else
+                            Console.WriteLine("Skipped texture " + tex.Name);
                     }
                 }
             }
+        }
+
+        static bool IsMaterialNameValid(string x)
+        {
+            return x.EndsWith("_alb", StringComparison.InvariantCultureIgnoreCase) ||
+                   x.EndsWith("_alb.0", StringComparison.InvariantCultureIgnoreCase) ||
+                   !x.Contains("_");
         }
         
         static void ExportTexture(Texture Tex, string FileName)

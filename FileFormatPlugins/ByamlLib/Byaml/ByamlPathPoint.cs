@@ -6,6 +6,11 @@ using Syroot.Maths;
 
 namespace ByamlExt.Byaml
 {
+	public class ByamlPathIndex
+	{
+		public int Index { get; set; }
+	}
+
     /// <summary>
     /// Represents a point in a BYAML path.
     /// </summary>
@@ -74,7 +79,7 @@ namespace ByamlExt.Byaml
 
 			public override object ConvertFrom(System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
 			{
-				Vector3F res;
+				Vector3F res = new Vector3F(0,0,0);
 				string[] tokens = ((string)value).Split(';');
 				res.X = Single.Parse(tokens[0]);
 				res.Y = Single.Parse(tokens[1]);

@@ -33,8 +33,9 @@
     <Reference Include="Syroot.BinaryData, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Syroot.IO.BinaryData.2.0.0\lib\net45\Syroot.BinaryData.dll</HintPath>
     </Reference>
-    <Reference Include="Syroot.Maths, Version=1.4.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Syroot.Maths.1.4.0\lib\net45\Syroot.Maths.dll</HintPath>
+    <Reference Include="Syroot.Maths, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\SwitchToolboxV1\Toolbox\Lib\Syroot.Maths.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -49,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ByamlExt.cs" />
+    <Compile Include="Byaml\BinaryStreamExtension.cs" />
     <Compile Include="Byaml\ByamlException.cs" />
     <Compile Include="Byaml\ByamlFile.cs" />
     <Compile Include="Byaml\ByamlNodeType.cs" />
@@ -65,6 +67,9 @@
     <Compile Include="Byaml\BymlPathPointEditor.Designer.cs">
       <DependentUpon>BymlPathPointEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="Byaml\Collections\DuplicateKeyComparer.cs" />
+    <Compile Include="Byaml\Collections\OrderedDictionary.cs" />
+    <Compile Include="Byaml\XmlByamlConverter.cs" />
     <Compile Include="Byaml\XmlConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

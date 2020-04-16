@@ -10,7 +10,7 @@ using System.Xml;
 
 namespace ByamlExt.Byaml
 {
-	static class XmlConverter
+    public static class XmlConverter
 	{
 		public static string ToXml(BymlFileData data)
 		{
@@ -39,7 +39,26 @@ namespace ByamlExt.Byaml
 			return UnicodeEncoding.Unicode.GetString(stream.ToArray());
 		}
 
-		public static BymlFileData ToByml(string xmlString)
+        public static BymlFileData XmlDataToByml(string xmlString)
+        {
+            BymlFileData ret = new BymlFileData();
+            XmlDocument xml = new XmlDocument();
+            xml.LoadXml(xmlString);
+            XmlNode n = xml.SelectSingleNode("/Root/isBigEndian");
+            ret.byteOrder = n.Attributes["Value"].Value.ToLower() == "true" ? ByteOrder.BigEndian : ByteOrder.LittleEndian;
+            n = xml.SelectSingleNode("/Root/BymlFormatVersion");
+            ret.Version = ushort.Parse(n.Attributes["Value"].Value);
+            n = xml.SelectSingleNode("/Root/SupportPaths");
+            ret.SupportPaths = n.Attributes["Value"].Value.ToLower() == "true";
+
+            n = xml.SelectSingleNode("/Root/BymlRoot");
+            if (n.ChildNodes.Count != 1) throw new Exception("A byml can have only one root");
+            ret.RootNode = ParseNode(n.FirstChild);
+
+            return ret;
+        }
+
+        public static BymlFileData ToByml(string xmlString)
 		{
 			BymlFileData ret = new BymlFileData();
 			XmlDocument xml = new XmlDocument();

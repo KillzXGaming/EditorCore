@@ -8,6 +8,8 @@ using LibEveryFileExplorer._3D;
 using System.Windows.Media.Media3D;
 using ExtensionMethods;
 using KCLExt;
+using Newtonsoft.Json;
+using System.Linq;
 
 namespace MarioKart.MK7
 {
@@ -40,8 +42,77 @@ namespace MarioKart.MK7
             }
         }
 
-        public KCL() { }
+        public static List<CollisionPresetData> CollisionPresets = new List<CollisionPresetData>();
 
+        public static void SavePresets(string folderPath)
+        {
+            if (!Directory.Exists(folderPath))
+                Directory.CreateDirectory(folderPath);
+
+            for (int i = 0; i < CollisionPresets.Count; i++)
+            {
+                string json = JsonConvert.SerializeObject(CollisionPresets[i], Formatting.Indented);
+                File.WriteAllText($"{folderPath}/{CollisionPresets[i].GameTitle}.json", json);
+            }
+        }
+
+        public static void LoadPresets(string[] filePaths)
+        {
+            for (int i = 0; i < filePaths.Length; i++) {
+                CollisionPresets.Add(JsonConvert.DeserializeObject<CollisionPresetData>(
+                    File.ReadAllText(filePaths[i])));
+            }
+        }
+
+        public KCL() 
+        {
+
+        }
+
+        public static void LoadDefaultPresets()
+        {
+            if (!CollisionPresets.Any(x => x.GameTitle == "Mario Odyssey"))
+                CreatePresetSM0();
+            if (!CollisionPresets.Any(x => x.GameTitle == "Mario Kart 8 Wii U / Deluxe"))
+                CreatePresetMK8();
+
+            CollisionPresets.Add(new CollisionPresetData()
+            {
+                GameTitle = "Other",
+                MaterialPresets = new Dictionary<ushort, string>(),
+            });
+        }
+
+        public static void CreatePresetSM0()
+        {
+            CollisionPresetData preset = new CollisionPresetData();
+            preset.GameTitle = "Mario Odyssey";
+            preset.PrismThickness = 40f;
+            preset.SphereRadius = 0f;
+            preset.MaterialPresets = new Dictionary<ushort, string>();
+            MarioKart.MK7.KCL.CollisionPresets.Add(preset);
+        }
+
+        public static void CreatePresetMK8()
+        {
+            CollisionPresetData preset = new CollisionPresetData();
+            preset.GameTitle = "Mario Kart 8 Wii U / Deluxe";
+            preset.MaterialPresets.Add(0, "Road");
+            preset.MaterialPresets.Add(2, "Road (Bumpy)");
+            preset.MaterialPresets.Add(4, "Road (Slippery)");
+            preset.MaterialPresets.Add(6, "Road (Offroad Sand)");
+            preset.MaterialPresets.Add(9, "Road (Slippery Effect Only)");
+            preset.MaterialPresets.Add(10, "Road (Booster)");
+            preset.MaterialPresets.Add(16, "Latiku");
+            preset.MaterialPresets.Add(31, "Glider");
+            preset.MaterialPresets.Add(32, "Road (Foamy Sound)");
+            preset.MaterialPresets.Add(40, "Road (Offroad, clicking Sound)");
+            preset.MaterialPresets.Add(56, "Unsolid");
+            preset.MaterialPresets.Add(60, "Water (Drown reset)");
+            preset.MaterialPresets.Add(64, "Road (Rocky Sound)");
+            preset.MaterialPresets.Add(81, "Wall");
+            MarioKart.MK7.KCL.CollisionPresets.Add(preset);
+        }
 
         public KCL(byte[] Data, ByteOrder bo = ByteOrder.LittleEndian)
         {
@@ -123,7 +194,7 @@ namespace MarioKart.MK7
                 //			res.AddRange(OctreeNodeToMesh(node.SubNodes[i]));
                 //	}
                 //	return res;
-                //}
+                //} 
 
                 //var o = new OBJ();
                 //for (int i = 0; i < mod.Octree.RootNodes.Length; i++)
@@ -615,16 +686,8 @@ namespace MarioKart.MK7
                 else
                     resMod.Octree = KCLOctree.FromTriangles(modelTri.ToArray(), resMod.Header);
 
-                if (MaterialSetForm.ActiveGamePreset == MaterialSetForm.ActivePreset.SMO)
-                {
-                    resMod.Header.PrismThickness = 40f; //odyssey values
-                    resMod.Header.SphereRadius = 0f;
-                }
-                else
-                {
-                    resMod.Header.PrismThickness = 30f; //mk8 values
-                    resMod.Header.SphereRadius = 25f;
-                }
+                resMod.Header.PrismThickness = MaterialSetForm.ActiveGamePreset.PrismThickness;
+                resMod.Header.SphereRadius = MaterialSetForm.ActiveGamePreset.SphereRadius;
 
                 return resMod;
             }
