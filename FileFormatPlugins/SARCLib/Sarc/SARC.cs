@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using Syroot.BinaryData;
 using ExtensionMethods;
+using System.Reflection;
 
 namespace SARCExt
 {
@@ -18,36 +19,64 @@ namespace SARCExt
 
     public static class SARC
     {
-        static SAHT mk8HashTable;
-        static SAHT MK8HashTable
-        {
-            get {
-                if (mk8HashTable == null)
-                    mk8HashTable = new SAHT(Properties.Resources.Mario_Kart_8);
-                return mk8HashTable;
-            }
-        }
-
-        static SAHT mk8dHashTable;
-        static SAHT MK8DHashTable
+        static SAHT[] hashTables = new SAHT[0];
+        static SAHT[] HashTables
         {
             get
             {
-                if (mk8dHashTable == null)
-                    mk8dHashTable = new SAHT(Properties.Resources.Mario_Kart_8_Deluxe);
-                return mk8dHashTable;
+                if (hashTables.Length == 0)
+                    hashTables = GetHashTables();
+                return hashTables;
             }
         }
 
-        static SAHT mkk7HashTable;
-        static SAHT MK7HashTable
+        static SAHT[] GetHashTables()
         {
-            get
+            string exexecPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+
+            List<SAHT> tables = new List<SAHT>();
+            tables.Add(new SAHT(Properties.Resources.Mario_Kart_7));
+            tables.Add(new SAHT(Properties.Resources.Mario_Kart_8));
+            tables.Add(new SAHT(Properties.Resources.Mario_Kart_8_Deluxe));
+
+            if (Directory.Exists($"{exexecPath}/Lib/Hashes"))
             {
-                if (mkk7HashTable == null)
-                    mkk7HashTable = new SAHT(Properties.Resources.Mario_Kart_7);
-                return mkk7HashTable;
+                foreach (var file in Directory.GetFiles($"{exexecPath}/Lib/Hashes"))
+                {
+                    if (System.IO.Path.GetExtension(file) == ".saht")
+                        tables.Add(new SAHT(file));
+                    else if (System.IO.Path.GetExtension(file) == ".txt")
+                        tables.Add(ParseHashText(file));
+                }
             }
+            return tables.ToArray();
+        }
+
+        static SAHT ParseHashText(string filePath)
+        {
+            SAHT table = new SAHT();
+            using (var reader = new StreamReader(filePath, Encoding.UTF8))
+            {
+                while (!reader.EndOfStream)
+                {
+                    string line = reader.ReadLine();
+                    string name = line.Replace(" ", string.Empty);
+                    if (name.Contains("$"))
+                    {
+                        for (int i = 0; i < 20; i++)
+                        {
+                            string numbered = name.Replace("$", i.ToString());
+                            table.HashEntries.Add(NameHash(numbered), numbered);
+                        }
+                    }
+
+                    uint hash = NameHash(name);
+                    if (!table.HashEntries.ContainsKey(hash))
+                        table.HashEntries.Add(hash, name);
+                }
+            }
+            return table;
         }
 
         static uint NameHash(string name)
@@ -272,14 +301,12 @@ namespace SARCExt
         public static string TryGetNameFromHashTable(string Hash)
         {
             uint hash = (uint)StringHashToUint(Hash);
-            if (MK8HashTable.HashEntries.ContainsKey(hash))
-                return MK8HashTable.HashEntries[hash];
-            else if (MK8DHashTable.HashEntries.ContainsKey(hash))
-                return MK8DHashTable.HashEntries[hash];
-            else if (MK7HashTable.HashEntries.ContainsKey(hash))
-                return MK7HashTable.HashEntries[hash];
-            else
-                return Hash;
+            foreach (var table in HashTables)
+            {
+                if (table.HashEntries.ContainsKey(hash))
+                    return table.HashEntries[hash];
+            }
+            return Hash;
         }
 
 		[Obsolete("This has been kept for compatibility, use PackN instead")]

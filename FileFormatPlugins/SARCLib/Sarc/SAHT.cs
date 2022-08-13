@@ -9,8 +9,15 @@ namespace SARCExt
 {
     public class SAHT
     {
+        public SAHT() { }
+
         public SAHT(byte[] data) {
             Read(new BinaryDataReader(new System.IO.MemoryStream(data)));
+        }
+
+        public SAHT(string filePath)
+        {
+            Read(new BinaryDataReader(System.IO.File.OpenRead(filePath)));
         }
 
         public Dictionary<uint, string> HashEntries = new Dictionary<uint, string>();
