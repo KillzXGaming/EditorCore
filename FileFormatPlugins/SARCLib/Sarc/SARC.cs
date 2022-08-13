@@ -34,15 +34,18 @@ namespace SARCExt
         {
             string exexecPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-
             List<SAHT> tables = new List<SAHT>();
             tables.Add(new SAHT(Properties.Resources.Mario_Kart_7));
             tables.Add(new SAHT(Properties.Resources.Mario_Kart_8));
             tables.Add(new SAHT(Properties.Resources.Mario_Kart_8_Deluxe));
+            string folder = Path.Combine(exexecPath, "Lib", "SarcHashes");
 
-            if (Directory.Exists($"{exexecPath}/Lib/Hashes"))
+            Console.WriteLine($"Searching {folder}");
+
+
+            if (Directory.Exists(folder))
             {
-                foreach (var file in Directory.GetFiles($"{exexecPath}/Lib/Hashes"))
+                foreach (var file in Directory.GetFiles(folder))
                 {
                     if (System.IO.Path.GetExtension(file) == ".saht")
                         tables.Add(new SAHT(file));
@@ -50,6 +53,9 @@ namespace SARCExt
                         tables.Add(ParseHashText(file));
                 }
             }
+
+            Console.WriteLine($"Loaded {tables.Count} SAHT");
+
             return tables.ToArray();
         }
 
