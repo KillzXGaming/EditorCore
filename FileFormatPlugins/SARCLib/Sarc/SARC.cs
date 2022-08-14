@@ -19,6 +19,9 @@ namespace SARCExt
 
     public static class SARC
     {
+        public static string HashDirectory = Path.Combine("Lib", "SarcHashes");
+
+
         static SAHT[] hashTables = new SAHT[0];
         static SAHT[] HashTables
         {
@@ -32,13 +35,11 @@ namespace SARCExt
 
         static SAHT[] GetHashTables()
         {
-            string exexecPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
             List<SAHT> tables = new List<SAHT>();
             tables.Add(new SAHT(Properties.Resources.Mario_Kart_7));
             tables.Add(new SAHT(Properties.Resources.Mario_Kart_8));
             tables.Add(new SAHT(Properties.Resources.Mario_Kart_8_Deluxe));
-            string folder = Path.Combine(exexecPath, "Lib", "SarcHashes");
+            string folder = HashDirectory;
 
             Console.WriteLine($"Searching {folder}");
 
