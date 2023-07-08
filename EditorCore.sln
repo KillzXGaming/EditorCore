@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2036
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33801.468
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EditorCore", "EditorCore\EditorCore.csproj", "{DF37F616-9CB6-4594-B30A-D5DD52EE1B3E}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OdysseyExt", "..\GamePlugin
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EditorCoreCommon", "EditorCoreCommon\EditorCoreCommon.csproj", "{EE9882D0-F7A7-45E1-971A-1527B7E399F5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{3F03EBC2-32AA-4892-922E-294E2496C9C7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -84,6 +86,10 @@ Global
 		{EE9882D0-F7A7-45E1-971A-1527B7E399F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE9882D0-F7A7-45E1-971A-1527B7E399F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE9882D0-F7A7-45E1-971A-1527B7E399F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F03EBC2-32AA-4892-922E-294E2496C9C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F03EBC2-32AA-4892-922E-294E2496C9C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F03EBC2-32AA-4892-922E-294E2496C9C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F03EBC2-32AA-4892-922E-294E2496C9C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

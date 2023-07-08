@@ -15,12 +15,14 @@ namespace SARCExt
 		public Dictionary<string, byte[]> Files;
 		public ByteOrder endianness;
 		public bool HashOnly;
-	}
+        public bool SignedHash;
+    }
 
     public static class SARC
     {
         public static string HashDirectory = Path.Combine("Lib", "SarcHashes");
 
+        static bool UseSignedHashes = false;
 
         static SAHT[] hashTables = new SAHT[0];
         static SAHT[] HashTables
@@ -86,14 +88,13 @@ namespace SARCExt
             return table;
         }
 
-        static uint NameHash(string name)
+        static uint NameHash(string name, uint key = 101)
         {
-            uint result = 0;
-            for (int i = 0; i < name.Length; i++)
-            {
-                result = name[i] + result * 0x00000065;
-            }
-            return result;
+            byte[] bytes = Encoding.UTF8.GetBytes(name);
+            uint num = 0;
+            for (int index = 0; index < bytes.Length; ++index)
+                num = !SARC.UseSignedHashes ? num * key + (uint)bytes[index] : (uint)((ulong)(num * key) + (ulong)(sbyte)bytes[index]);
+            return num;
         }
 
         static uint StringHashToUint(string name)
@@ -174,8 +175,8 @@ namespace SARCExt
 		public static Tuple<int, byte[]> PackN(SarcData data, int _align = -1)
 		{			
 			int align = _align >= 0 ? _align : (int)GuessAlignment(data.Files);
-
-			MemoryStream o = new MemoryStream();
+            SARC.UseSignedHashes = data.SignedHash;
+            MemoryStream o = new MemoryStream();
 			BinaryDataWriter bw = new BinaryDataWriter(o, false);
 			bw.ByteOrder = data.endianness;
 			bw.Write("SARC", BinaryStringFormat.NoPrefixOrTermination);
@@ -255,6 +256,8 @@ namespace SARCExt
 
 		public static SarcData UnpackRamN(Stream src)
 		{
+            UseSignedHashes = false;
+
             Dictionary<string, byte[]> res = new Dictionary<string, byte[]>();
 			BinaryDataReader br = new BinaryDataReader(src, false);
 			br.ByteOrder = ByteOrder.LittleEndian;
@@ -302,7 +305,7 @@ namespace SARCExt
                 }
             }
 
-			return new SarcData() {endianness = br.ByteOrder, HashOnly = HashOnly, Files = res };
+			return new SarcData() {endianness = br.ByteOrder, HashOnly = HashOnly, Files = res, SignedHash = UseSignedHashes, };
 		}
 
         public static string TryGetNameFromHashTable(string Hash)
@@ -384,17 +387,19 @@ namespace SARCExt
                 chunkID = br.ReadUInt32();
                 chunkSize = br.ReadUInt16();
                 unknown1 = br.ReadUInt16();
-
-                char[] temp = br.ReadChars(start - (int)br.BaseStream.Position);
-                string temp2 = new string(temp);
-                char[] splitter = { (char)0x00 };
-                string[] names = temp2.Split(splitter);
-                for (int j = 0; j < names.Length; j++)
+                byte[] bytes = ((BinaryReader)br).ReadBytes(start - (int)((BinaryReader)br).BaseStream.Position);
+                string str = Encoding.UTF8.GetString(bytes);
+                for (int index = 0; index < bytes.Length; ++index)
                 {
-                    if (names[j] != "")
-                    {
-                        fileNames.Add(names[j]);
-                    }
+                    if ((sbyte)bytes[index] < (sbyte)0)
+                        SARC.UseSignedHashes = true;
+                }
+                char[] chArray = new char[1];
+                string[] strArray = str.Split(chArray);
+                for (int index = 0; index < strArray.Length; ++index)
+                {
+                    if (strArray[index] != "")
+                        this.fileNames.Add(strArray[index]);
                 }
             }
         }

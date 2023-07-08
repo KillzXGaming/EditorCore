@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ByamlExt</RootNamespace>
     <AssemblyName>ByamlExt</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -35,7 +36,7 @@
     </Reference>
     <Reference Include="Syroot.Maths, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\SwitchToolboxV1\Toolbox\Lib\Syroot.Maths.dll</HintPath>
+      <HintPath>..\..\Syroot.Maths.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

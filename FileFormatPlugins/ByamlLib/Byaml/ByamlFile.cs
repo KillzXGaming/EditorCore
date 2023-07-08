@@ -37,6 +37,11 @@ namespace ByamlExt.Byaml
 
         private List<string> _nameArray;
         private List<string> _stringArray;
+
+        private Dictionary<ulong, List<long>> _pointedUint64s;
+        private Dictionary<long, List<long>> _pointedInt64s;
+        private Dictionary<double, List<long>> _pointedDoubles;
+
         private List<List<ByamlPathPoint>> _pathArray;
 		private bool _fastLoad = false;
 
@@ -470,6 +475,10 @@ namespace ByamlExt.Byaml
             _nameArray = new List<string>();
             _stringArray = new List<string>();
             _pathArray = new List<List<ByamlPathPoint>>();
+            _pointedUint64s = new Dictionary<ulong, List<long>>();
+            _pointedInt64s = new Dictionary<long, List<long>>();
+            _pointedDoubles = new Dictionary<double, List<long>>();
+
             CollectNodeArrayContents(root);
             readNodes.Clear();
             _nameArray.Sort(StringComparer.Ordinal);
@@ -506,6 +515,44 @@ namespace ByamlExt.Byaml
 
                 // Write the root node.
                 WriteEnumerableNode(writer, rootOffset.Position, GetNodeType(root), (IEnumerable)root);
+
+
+                foreach (var val in _pointedUint64s)
+                {
+                    foreach (var pos in val.Value)
+                    {
+                        long p = writer.Position;
+                        using (writer.TemporarySeek(pos, SeekOrigin.Begin))
+                        {
+                            writer.Write((uint)p);
+                        }
+                        writer.Write(val.Key);
+                    }
+                }
+                foreach (var val in _pointedInt64s)
+                {
+                    foreach (var pos in val.Value)
+                    {
+                        long p = writer.Position;
+                        using (writer.TemporarySeek(pos, SeekOrigin.Begin))
+                        {
+                            writer.Write((uint)p);
+                        }
+                        writer.Write(val.Key);
+                    }
+                }
+                foreach (var val in _pointedDoubles)
+                {
+                    foreach (var pos in val.Value)
+                    {
+                        long p = writer.Position;
+                        using (writer.TemporarySeek(pos, SeekOrigin.Begin))
+                        {
+                            writer.Write((uint)p);
+                        }
+                        writer.Write(val.Key);
+                    }
+                }
             }
         }
 
@@ -565,12 +612,38 @@ namespace ByamlExt.Byaml
                     writer.Write(value ? 1 : 0);
                     return 0;
                 case ByamlNodeType.Integer:
-				case ByamlNodeType.Float:
-				case ByamlNodeType.Uinteger:
+                    writer.Write((int)value);
+                    return 0;
+                case ByamlNodeType.Float:
+                    writer.Write((float)value);
+                    return 0;
+                case ByamlNodeType.Uinteger:
+                    writer.Write((uint)value);
+                    return 0;
                 case ByamlNodeType.Double:
                 case ByamlNodeType.ULong:
                 case ByamlNodeType.Long:
-                    writer.Write(value);
+                    long pos = writer.Position;
+                    writer.Write(0);
+
+                    if (type == ByamlNodeType.ULong)
+                    {
+                        if (!_pointedUint64s.ContainsKey(value))
+                            _pointedUint64s.Add(value, new List<long>());
+                        _pointedUint64s[value].Add(pos);
+                    }
+                    if (type == ByamlNodeType.Long)
+                    {
+                        if (!_pointedInt64s.ContainsKey(value))
+                            _pointedInt64s.Add(value, new List<long>());
+                        _pointedInt64s[value].Add(pos);
+                    }
+                    if (type == ByamlNodeType.Double)
+                    {
+                        if (!_pointedDoubles.ContainsKey(value))
+                            _pointedDoubles.Add(value, new List<long>());
+                        _pointedDoubles[value].Add(pos);
+                    }
                     return 0;
                 case ByamlNodeType.Null:
                     writer.Write(0x0);
@@ -672,6 +745,9 @@ namespace ByamlExt.Byaml
 
         private void WriteDictionaryNode(BinaryDataWriter writer, IDictionary<string, dynamic> node)
         {
+            if (node?.Count <= 0)
+                return;
+
             List<EnumerableNode> enumerables = node
                .Where(x => (GetNodeType(x.Value) >= ByamlNodeType.Array && GetNodeType(x.Value) <= ByamlNodeType.PathArray))
                .Select(x => new EnumerableNode { Node = (IEnumerable)x.Value })
