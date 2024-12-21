@@ -157,17 +157,21 @@ namespace SARCExt
 		{
             if (f.Matches("SARC")) return 0x2000;
             else if (f.Matches("Yaz")) return 0x80;
-            else if (f.Matches("YB") || f.Matches("BY")) return 0x80;
+            else if (f.Matches("YB") || f.Matches("BY")) return 0x4;
             else if (f.Matches("FRES") || f.Matches("Gfx2") || f.Matches("AAHS") || f.Matches("BAHS")) return 0x2000;
             else if (f.Matches("EFTF") || f.Matches("VFXB") || f.Matches("SPBD")) return 0x2000;
             else if (f.Matches("BNTX") || f.Matches("BNSH") || f.Matches("FSHA")) return 0x1000;
             else if (f.Matches("FFNT")) return 0x2000;
-            else if (f.Matches("CFNT")) return 0x80;
+            else if (f.Matches("CFNT")) return 0x2000;
+            else if (f.Matches("CFNU")) return 0x2000;
+            else if (f.Matches("XLNK")) return 0x100;
             else if (f.Matches(1, "STM") /* *STM */ || f.Matches(1, "WAV") || f.Matches("FSTP")) return 0x20;
             else if (f.Matches("CTPK")) return 0x10;
             else if (f.Matches("CGFX")) return 0x80;
             else if (f.Matches("AAMP")) return 8;
-            else if (f.Matches("MsgStdBn") || f.Matches("MsgPrjBn")) return 0x80;
+            else if (f.Matches("SMDH")) return 0x4;
+            else if (f.Matches("MsgF")) return 0x4;
+            else if (f.Matches("MsgStdBn") || f.Matches("MsgPrjBn")) return 4;
             else if (f.Matches((uint)(f.Length - 0x28), "FLIM")) return (uint)f.GetAlignment((uint)(f.Length - 8), typeof(ushort));
             else return 0x4;
 		}

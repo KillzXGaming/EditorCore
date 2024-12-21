@@ -521,6 +521,8 @@ namespace ByamlExt.Byaml
                 {
                     foreach (var pos in val.Value)
                     {
+                        writer.Align(4);
+
                         long p = writer.Position;
                         using (writer.TemporarySeek(pos, SeekOrigin.Begin))
                         {
@@ -533,6 +535,8 @@ namespace ByamlExt.Byaml
                 {
                     foreach (var pos in val.Value)
                     {
+                        writer.Align(4);
+
                         long p = writer.Position;
                         using (writer.TemporarySeek(pos, SeekOrigin.Begin))
                         {
@@ -545,6 +549,8 @@ namespace ByamlExt.Byaml
                 {
                     foreach (var pos in val.Value)
                     {
+                        writer.Align(4);
+
                         long p = writer.Position;
                         using (writer.TemporarySeek(pos, SeekOrigin.Begin))
                         {
