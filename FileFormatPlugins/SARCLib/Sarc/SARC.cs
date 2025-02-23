@@ -162,6 +162,7 @@ namespace SARCExt
             else if (f.Matches("EFTF") || f.Matches("VFXB") || f.Matches("SPBD")) return 0x2000;
             else if (f.Matches("BNTX") || f.Matches("BNSH") || f.Matches("FSHA")) return 0x1000;
             else if (f.Matches("FFNT")) return 0x2000;
+            else if (f.Matches("FGRP")) return 0x2000;
             else if (f.Matches("CFNT")) return 0x2000;
             else if (f.Matches("CFNU")) return 0x2000;
             else if (f.Matches("XLNK")) return 0x100;
